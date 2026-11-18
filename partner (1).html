@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#100d0a">
 <meta name="description" content="ZaikaBox Restaurant Partner Dashboard">
-<link rel="manifest" href="./partner-manifest.webmanifest">
+<link rel="manifest" href="./manifest.webmanifest">
 <title>ZaikaBox Restaurant Partner</title>
 
 <style>
@@ -169,8 +169,8 @@ $("globalStatus").textContent=message;
 
 function safe(value){
 return String(value??"").replace(/[&<>"']/g,char=>({
-"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-})[char]);
+"&":"&amp;",">":"&gt;",'"':"&quot;","'":"&#039;"
+})[char]||char);
 }
 
 function menuCollection(){
@@ -187,45 +187,28 @@ ordersUnsubscribe=null;
 
 function explainAuthError(error){
 const code=error?.code||"unknown";
-
-if(code==="auth/api-key-not-valid"){
-return "Firebase API key invalid. Config check karein.";
-}
-if(code==="auth/invalid-credential"||code==="auth/wrong-password"){
-return "Email ya password galat hai.";
-}
-if(code==="auth/user-not-found"){
-return "Is email ka Firebase account nahi mila.";
-}
-if(code==="auth/too-many-requests"){
-return "Bahut login attempts hue. Thodi der baad try karein.";
-}
-if(code==="auth/network-request-failed"){
-return "Internet connection check karein.";
-}
-if(code==="auth/operation-not-allowed"){
-return "Firebase Console mein Email/Password login enable karein.";
-}
+if(code==="auth/api-key-not-valid")return "Firebase API key invalid. Config check karein.";
+if(code==="auth/invalid-credential"||code==="auth/wrong-password")return "Email ya password galat hai.";
+if(code==="auth/user-not-found")return "Is email ka Firebase account nahi mila.";
+if(code==="auth/too-many-requests")return "Bahut login attempts hue. Thodi der baad try karein.";
+if(code==="auth/network-request-failed")return "Internet connection check karein.";
+if(code==="auth/operation-not-allowed")return "Firebase Console mein Email/Password login enable karein.";
 return "LOGIN ERROR: "+code+" - "+(error?.message||"Unknown error");
 }
 
 // LOGIN
 $("loginBtn").addEventListener("click",async()=>{
 if(loginInProgress)return;
-
 const email=$("email").value.trim();
 const password=$("password").value;
-
 if(!email||!password){
 setStatus("Email aur password dono bhariye.");
 return;
 }
-
 loginInProgress=true;
 $("loginBtn").disabled=true;
 $("loginBtn").textContent="LOGGING IN...";
 setStatus("Firebase login request bheja ja raha hai...");
-
 try{
 await signInWithEmailAndPassword(auth,email,password);
 setStatus("Login successful. Partner account check ho raha hai...");
@@ -259,7 +242,6 @@ setStatus("Logged out.");
 setStatus("LOGOUT ERROR: "+error.message);
 }
 }
-
 $("logoutBtn").addEventListener("click",logoutPartner);
 $("errorLogoutBtn").addEventListener("click",logoutPartner);
 
@@ -289,33 +271,21 @@ setStatus("Checking partner account...");
 try{
 const accountSnapshot=await getDoc(doc(db,"accounts",user.uid));
 if(version!==authVersion)return;
-
-if(!accountSnapshot.exists())
-throw new Error("accounts document nahi mila. UID: "+user.uid);
+if(!accountSnapshot.exists())throw new Error("accounts document nahi mila. UID: "+user.uid);
 
 const account=accountSnapshot.data();
-
-if(account.role!=="restaurant")
-throw new Error("Account role restaurant nahi hai.");
-
-if(account.active!==true)
-throw new Error("Partner account active nahi hai.");
-
-if(!account.restaurantId)
-throw new Error("restaurantId missing hai.");
+if(account.role!=="restaurant")throw new Error("Account role restaurant nahi hai.");
+if(account.active!==true)throw new Error("Partner account active nahi hai.");
+if(!account.restaurantId)throw new Error("restaurantId missing hai.");
 
 currentRestaurantId=account.restaurantId;
 
 const restaurantSnapshot=await getDoc(doc(db,"restaurants",currentRestaurantId));
 if(version!==authVersion)return;
-
-if(!restaurantSnapshot.exists())
-throw new Error("Restaurant record nahi mila: "+currentRestaurantId);
+if(!restaurantSnapshot.exists())throw new Error("Restaurant record nahi mila: "+currentRestaurantId);
 
 const restaurant=restaurantSnapshot.data();
-
-if(restaurant.active===false)
-throw new Error("Restaurant inactive hai.");
+if(restaurant.active===false)throw new Error("Restaurant inactive hai.");
 
 currentRestaurantName=restaurant.name||"Restaurant";
 $("restaurantName").textContent=currentRestaurantName;
@@ -325,16 +295,13 @@ $("dashboard").classList.remove("hidden");
 setStatus("Account verified. Menu and orders loading...");
 await loadMenu();
 if(version!==authVersion)return;
-
 startLiveOrders();
 if(version!==authVersion)return;
-
 setStatus("SUCCESS: "+currentRestaurantName+" dashboard ready. Live orders active.");
 
 }catch(error){
 console.error("PARTNER VERIFICATION ERROR:",error);
 if(version!==authVersion)return;
-
 currentRestaurantId=null;
 stopLiveOrders();
 $("dashboard").classList.add("hidden");
@@ -351,7 +318,6 @@ setStatus("AUTH ERROR: "+(error.code||"unknown")+" - "+error.message);
 async function loadMenu(){
 if(!currentRestaurantId)return;
 $("menuList").textContent="Loading menu...";
-
 try{
 const snapshot=await getDocs(menuCollection());
 partnerMenuItems=snapshot.docs.map(item=>({id:item.id,...item.data()}));
@@ -378,7 +344,6 @@ return `
 <button class="danger" data-action="delete" data-id="${safe(item.id)}">DELETE</button>
 </div>`;
 }).join("");
-
 }catch(error){
 console.error("MENU ERROR:",error);
 $("menuList").textContent="MENU ERROR: "+(error.code||"")+" "+error.message;
@@ -414,7 +379,6 @@ return;
 
 $("saveItemBtn").disabled=true;
 $("menuMessage").textContent="Saving...";
-
 const itemData={name,price,category,description,emoji,available,updatedAt:serverTimestamp()};
 
 try{
@@ -439,17 +403,14 @@ $("saveItemBtn").disabled=false;
 $("menuList").addEventListener("click",async event=>{
 const button=event.target.closest("button[data-action]");
 if(!button||!currentRestaurantId)return;
-
 const id=button.dataset.id;
 const action=button.dataset.action;
 const item=partnerMenuItems.find(x=>x.id===id);
 if(!item)return;
-
 const itemRef=doc(db,"restaurants",currentRestaurantId,"menuItems",id);
 
 try{
 button.disabled=true;
-
 if(action==="edit"){
 $("editItemId").value=item.id;
 $("itemName").value=item.name||"";
@@ -486,11 +447,7 @@ function startLiveOrders(){
 if(!currentRestaurantId)return;
 stopLiveOrders();
 $("ordersList").textContent="Live orders connect ho rahe hain...";
-
-const ordersQuery=query(
-collection(db,"orders"),
-where("restaurantId","==",currentRestaurantId)
-);
+const ordersQuery=query(collection(db,"orders"),where("restaurantId","==",currentRestaurantId));
 
 ordersUnsubscribe=onSnapshot(ordersQuery,snapshot=>{
 partnerOrders=snapshot.docs.map(item=>({id:item.id,...item.data()}));
@@ -513,7 +470,6 @@ $("ordersList").innerHTML=partnerOrders.map(order=>{
 const items=Array.isArray(order.items)
 ?order.items.map(item=>`${safe(item.name||"Item")} × ${safe(item.quantity||item.qty||1)}`).join("<br>")
 :safe(order.items||"Items unavailable");
-
 const date=order.createdAt?.toDate?order.createdAt.toDate().toLocaleString("en-IN"):"Time unavailable";
 const status=order.status||"New";
 
@@ -536,16 +492,14 @@ return `
 }).join("");
 }
 
-// ORDER STATUS UPDATE — FIXED: ONLY STATUS FIELD
+// ORDER STATUS UPDATE — ONLY STATUS FIELD
 $("ordersList").addEventListener("click",async event=>{
 const button=event.target.closest("button[data-order]");
 if(!button||!currentRestaurantId)return;
-
 const orderId=button.dataset.order;
 const status=button.dataset.status;
 const order=partnerOrders.find(item=>item.id===orderId);
 if(!order)return;
-
 if(!confirm("Order status "+status+" karna hai?"))return;
 
 button.disabled=true;
@@ -553,25 +507,15 @@ button.textContent="UPDATING...";
 
 try{
 const batch=writeBatch(db);
+batch.update(doc(db,"orders",orderId),{status});
 
-// Orders document: status only
-batch.update(doc(db,"orders",orderId),{
-status
-});
-
-// Tracking document: status only
 if(order.trackingCode){
 const trackingCode=String(order.trackingCode).toUpperCase().replace(/[\s-]/g,"");
-batch.update(doc(db,"orderTracking",trackingCode),{
-status
-});
+batch.update(doc(db,"orderTracking",trackingCode),{status});
 }
-
 await batch.commit();
-
 setStatus("Order status updated: "+status);
 alert("Order status successfully updated: "+status);
-
 }catch(error){
 console.error("ORDER UPDATE ERROR:",error);
 alert("ORDER ERROR: "+(error.code||"")+" - "+error.message);
@@ -588,7 +532,6 @@ if(!currentRestaurantId)return;
 setStatus("Live orders reconnecting...");
 startLiveOrders();
 });
-
 </script>
 </body>
 </html>
