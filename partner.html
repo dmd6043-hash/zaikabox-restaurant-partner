@@ -447,10 +447,10 @@ function startLiveOrders(){
 if(!currentRestaurantId)return;
 stopLiveOrders();
 $("ordersList").textContent="Live orders connect ho rahe hain...";
-const ordersQuery=query(collection(db,"orders"),where("restaurantId","==",currentRestaurantId),where("paymentStatus","==","Paid"));
+const ordersQuery=query(collection(db,"orders"),where("restaurantId","==",currentRestaurantId));
 
 ordersUnsubscribe=onSnapshot(ordersQuery,snapshot=>{
-partnerOrders=snapshot.docs.map(item=>({id:item.id,...item.data()}));
+partnerOrders=snapshot.docs.map(item=>({id:item.id,...item.data()})).filter(order=>order.paymentStatus==="Paid" || !order.paymentStatus);
 partnerOrders.sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));
 renderOrders();
 },error=>{
