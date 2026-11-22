@@ -212,7 +212,9 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
   <p>Your registration has been submitted successfully.</p>
   <p>Our ZaikaBox team will review your application and contact you soon.</p>
   <p class="small">Your application is pending Super Admin approval. You cannot start operations until approval is granted.</p>
-  <button class="primary" id="successBackToLoginBtn" type="button" style="width:100%;min-height:48px;margin-top:18px">BACK TO LOGIN</button>
+  <button class="primary" id="successWhatsAppBtn" type="button" style="width:100%;min-height:50px;margin-top:18px">OPEN WHATSAPP &amp; SEND DOCUMENTS</button>
+  <p class="small">WhatsApp chat khulega. Aadhaar (masked), PAN aur FSSAI files ko chat mein attach karke Send dabayein.</p>
+  <button class="secondary" id="successBackToLoginBtn" type="button" style="width:100%;min-height:44px;margin-top:8px">BACK TO LOGIN</button>
 </div>
 
 <div id="dashboard" class="hidden">
@@ -430,6 +432,10 @@ $("registerBackBtn").addEventListener("click",()=>{
   $("registerPanel").classList.add("hidden");
   $("loginBox").classList.remove("hidden");
 });
+$("successWhatsAppBtn").addEventListener("click",()=>{
+  const url=$("successWhatsAppBtn").dataset.url;
+  if(url)window.location.href=url;
+});
 $("successBackToLoginBtn").addEventListener("click",()=>{
   $("registrationSuccess").style.display="none";
   $("loginBox").classList.remove("hidden");
@@ -512,6 +518,9 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
     return;
   }
   const button=$("submitRegistrationBtn");
+  // Open a tab from the submit gesture; navigate it to WhatsApp only after save succeeds.
+  let whatsappTab=null;
+  try{whatsappTab=window.open("about:blank","_blank");}catch(_){}
   button.disabled=true;
   button.classList.add("is-loading");
   button.setAttribute("aria-busy","true");
@@ -554,24 +563,22 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
       "Documents to attach: Masked Aadhaar ("+selectedDocs.ownerId.name+"), PAN ("+selectedDocs.pan.name+"), FSSAI certificate ("+selectedDocs.fssai.name+")"+(selectedDocs.shopPhoto?", Shop photo ("+selectedDocs.shopPhoto.name+")":""),
       "Applicant consented to share these documents for verification."
     ].join("\n");
-    $("registrationMessage").textContent="Details Admin mein save ho gayi hain. WhatsApp par documents bhejein...";
-    const files=Object.values(selectedDocs).filter(Boolean);
-    let shared=false;
-    if(navigator.share && navigator.canShare && navigator.canShare({files})){
-      try{await navigator.share({title:"ZaikaBox Restaurant Registration",text:applicationText,files});shared=true;}
-      catch(shareError){if(shareError.name!=="AbortError")console.warn("Native file share unavailable:",shareError);}
-    }
-    if(!shared){
-      window.open("https://wa.me/918319014718?text="+encodeURIComponent(applicationText+"\n\nPlease attach the selected documents in this WhatsApp chat and press Send."),"_blank","noopener");
+    $("registrationMessage").textContent="Application save ho gayi. WhatsApp chat khol rahe hain...";
+    const whatsappMessage=applicationText+"\n\nPlease attach the selected masked Aadhaar, PAN and FSSAI files in this chat, then press Send.";
+    const whatsappUrl="https://wa.me/918319014718?text="+encodeURIComponent(whatsappMessage);
+    $("successWhatsAppBtn").dataset.url=whatsappUrl;
+    if(whatsappTab && !whatsappTab.closed){
+      whatsappTab.location.href=whatsappUrl;
     }
     try{await signOut(auth);}catch(signOutError){console.warn("Application saved; sign-out retry may be needed:",signOutError);}
     $("restaurantRegistrationForm").reset();
     $("registerPanel").classList.add("hidden");$("loginBox").classList.add("hidden");
     $("registrationSuccess").style.display="block";
     $("registrationSuccess").querySelector("p").textContent="Your registration details have been saved successfully.";
-    $("registrationSuccess").querySelectorAll("p")[1].textContent="WhatsApp will open so you can send the selected documents to ZaikaBox.";
-    setStatus("Application details saved. WhatsApp document sharing ready; Admin approval pending.");
+    $("registrationSuccess").querySelectorAll("p")[1].textContent="Application details saved. WhatsApp par selected documents attach karke Send karna zaroori hai.";
+    setStatus("Application saved. WhatsApp document sharing is ready; Admin approval pending.");
   }catch(error){
+    try{if(whatsappTab && !whatsappTab.closed)whatsappTab.close();}catch(_){}
     console.error("RESTAURANT REGISTRATION ERROR:",error);
     $("registrationMessage").textContent=(error.code||"")+" - "+error.message;
     setStatus("Registration failed. Details form mein dekhein.");
