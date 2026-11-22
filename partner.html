@@ -183,19 +183,19 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
         <option value="">Select food category</option>
         <option>Pure Veg</option><option>Non-Veg</option><option>Both Veg & Non-Veg</option>
       </select>
-      <label for="regFssai">FSSAI Registration / License number (if available)</label>
-      <input id="regFssai" maxlength="30" placeholder="FSSAI number, if already available">
+      <label for="regFssai">FSSAI Registration / License number * (mandatory)</label>
+      <input id="regFssai" required maxlength="30" placeholder="Enter FSSAI number">
 
       <label for="regOwnerIdDoc">Masked Aadhaar card photo * (mandatory)</label>
       <input id="regOwnerIdDoc" type="file" accept="image/jpeg,image/png,application/pdf" required>
       <label for="regPanDoc">PAN card photo * (mandatory)</label>
       <input id="regPanDoc" type="file" accept="image/jpeg,image/png,application/pdf" required>
-      <label for="regFssaiDoc">FSSAI certificate photo (if available)</label>
-      <input id="regFssaiDoc" type="file" accept="image/jpeg,image/png,application/pdf">
+      <label for="regFssaiDoc">FSSAI certificate photo * (mandatory)</label>
+      <input id="regFssaiDoc" type="file" accept="image/jpeg,image/png,application/pdf" required>
       <label for="regShopPhoto">Restaurant / shop front photo</label>
       <input id="regShopPhoto" type="file" accept="image/jpeg,image/png">
     </div>
-    <div class="registration-note">Masked Aadhaar aur PAN card verification ke liye mandatory hain. Aadhaar ki sirf masked copy upload karein (pehle 8 digits hidden); full Aadhaar number/card upload na karein. Documents Super Admin verification ke liye use honge. Har file maximum 5 MB. FSSAI document na hone par application review mein rahegi. Bank details payout activate karne se pehle mandatory hongi.</div>
+    <div class="registration-note">Masked Aadhaar, PAN card aur valid FSSAI Registration / License number with certificate mandatory hain. Aadhaar ki sirf masked copy upload karein (pehle 8 digits hidden); full Aadhaar number/card upload na karein. Documents Super Admin verification ke liye use honge. Har file maximum 5 MB. Bank details payout activate karne se pehle mandatory hongi.</div>
     <label style="display:flex;gap:9px;align-items:flex-start;font-weight:500"><input id="regConsent" type="checkbox" required style="width:20px;min-height:20px;margin:2px 0"> I confirm that the information is correct and I agree to Admin verification.</label>
     <button class="primary" id="submitRegistrationBtn" type="submit">SUBMIT APPLICATION</button>
     <button class="secondary" id="registerBackBtn" type="button">BACK TO LOGIN</button>
@@ -490,8 +490,8 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
     fssai:$("regFssaiDoc").files[0]||null,
     shopPhoto:$("regShopPhoto").files[0]||null
   };
-  if(!selectedDocs.ownerId || !selectedDocs.pan){
-    $("registrationMessage").textContent="Masked Aadhaar aur PAN card dono upload karna mandatory hai.";
+  if(!selectedDocs.ownerId || !selectedDocs.pan || !selectedDocs.fssai || !fssaiNumber){
+    $("registrationMessage").textContent="Masked Aadhaar, PAN card, FSSAI number aur FSSAI certificate sab mandatory hain.";
     return;
   }
   const allowedTypes=["image/jpeg","image/png","application/pdf"];
@@ -533,9 +533,9 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
       applicantUid:uid,
       ownerName,phone,email,restaurantName,address,city,businessType,foodType,
       fssaiNumber,
-      fssaiProvided:!!fssaiNumber,
+      fssaiProvided:true,
       documents,
-      status:fssaiNumber?"Pending Approval":"Pending Review",
+      status:"Pending Approval",
       bankStatus:"Not Submitted",
       branchPolicy:"Single Restaurant Per Owner",
       createdAt:serverTimestamp(),
@@ -547,9 +547,7 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
     $("registerPanel").classList.add("hidden");
     $("loginBox").classList.add("hidden");
     $("registrationSuccess").style.display="block";
-    setStatus(fssaiNumber
-      ?"Application submitted. Super Admin verification pending."
-      :"Application submitted. FSSAI missing: application is on review hold.");
+    setStatus("Application submitted. Super Admin verification pending.");
   }catch(error){
     console.error("RESTAURANT REGISTRATION ERROR:",error);
     $("registrationMessage").textContent=(error.code||"")+" - "+error.message;
