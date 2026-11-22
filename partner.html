@@ -11,29 +11,44 @@
 
 <style>
 *{box-sizing:border-box}
-body{margin:0;padding:16px;background:#100d0a;color:#fffaf5;font-family:Arial,sans-serif}
+:root{--orange:#ff8a35;--panel:#1b1715;--line:#382a22;--muted:#c9b9ad}
+body{margin:0;padding:16px 16px 92px;background:radial-gradient(circle at 85% 0%,#342014 0,#100d0a 38%);color:#fffaf5;font-family:Arial,sans-serif;min-height:100vh}
 .wrap{max-width:850px;margin:auto}
-h1{color:#ff8a35;margin-bottom:4px}
+h1{color:var(--orange);margin:0 0 4px;letter-spacing:2px}
 h2{margin-top:0}
-.card{background:#1c1814;border:1px solid #392b20;border-radius:15px;padding:17px;margin:14px 0}
-input,select,textarea{width:100%;padding:13px;margin:7px 0 13px;border:1px solid #594276;border-radius:9px;background:#160e25;color:#fff;font-size:15px}
+.card{background:linear-gradient(145deg,#211b17,#171310);border:1px solid var(--line);border-radius:19px;padding:18px;margin:14px 0;box-shadow:0 10px 28px #0005}
+input,select,textarea{width:100%;padding:14px;margin:7px 0 13px;border:1px solid #594276;border-radius:12px;background:#160e25;color:#fff;font-size:15px}
 label{font-size:13px;color:#e0cbb9}
-button{padding:11px 15px;margin:4px;border:0;border-radius:9px;font-weight:bold;cursor:pointer}
-button:disabled{opacity:.5;cursor:not-allowed}
-.primary{background:#ff8a35;color:#180d2e}
-.secondary{background:#44315d;color:#fff}
-.danger{background:#e85d75;color:#fff}
-.success{background:#4cba86;color:#10251b}
+button{padding:12px 16px;margin:4px;border:0;border-radius:12px;font-weight:bold;cursor:pointer;transition:transform .16s ease,filter .16s ease,box-shadow .16s ease;box-shadow:0 4px 12px #0003; -webkit-tap-highlight-color:transparent}
+button:active{transform:scale(.94);filter:brightness(1.2);box-shadow:0 1px 4px #0005}
+button:focus-visible{outline:2px solid #fff;outline-offset:3px}
+button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.primary{background:linear-gradient(135deg,#ffad58,#ff7626);color:#211006}
+.secondary{background:linear-gradient(135deg,#563d70,#342347);color:#fff}
+.danger{background:linear-gradient(135deg,#f17686,#d94d65);color:#fff}
+.success{background:linear-gradient(135deg,#59d49a,#29996a);color:#10251b}
 .hidden{display:none!important}
-.small{font-size:13px;color:#c8bad9;overflow-wrap:anywhere}
-#globalStatus{background:#302044;color:#ffd27a;padding:13px;border-radius:10px;margin:14px 0;overflow-wrap:anywhere;line-height:1.5}
+.small{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+#globalStatus{background:#302044;color:#ffd27a;padding:13px;border-radius:12px;margin:14px 0;overflow-wrap:anywhere;line-height:1.5}
 #menuMessage{color:#ffd27a;overflow-wrap:anywhere}
-.item,.order{border:1px solid #594276;border-radius:12px;padding:13px;margin:12px 0;overflow-wrap:anywhere}
+.item,.order{background:#211b18;border:1px solid #49372b;border-radius:15px;padding:15px;margin:12px 0;overflow-wrap:anywhere}
 .item h3,.order h3{color:#ffb16f;margin:0 0 8px}
 .row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .tag{display:inline-block;background:#3a2854;padding:5px 9px;border-radius:20px;font-size:12px}
 hr{border:0;border-top:1px solid #49365f;margin:16px 0}
 .order-buttons{display:flex;flex-wrap:wrap;gap:5px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 2px}
+.eyebrow{font-size:11px;letter-spacing:2px;color:#c7a58b}
+.page{animation:pageIn .24s ease both}
+@keyframes pageIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stat{padding:16px;border-radius:15px;background:linear-gradient(145deg,#302116,#1d1713);border:1px solid #604027}
+.stat strong{display:block;color:#ffae69;font-size:22px;margin-bottom:5px}
+.navbar{position:fixed;z-index:20;bottom:0;left:0;right:0;display:flex;justify-content:center;gap:7px;padding:10px max(10px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom));background:#100d0aee;backdrop-filter:blur(16px);border-top:1px solid #493323}
+.navbtn{flex:1;max-width:170px;margin:0;padding:10px 5px;background:#211a17;color:#bda99a;border:1px solid #392a20;font-size:12px}
+.navbtn.active{background:linear-gradient(135deg,#ffad58,#ff7626);color:#211006;border-color:transparent}
+.shortcut{width:100%;margin:5px 0;text-align:left}
+
 </style>
 </head>
 
@@ -60,17 +75,29 @@ hr{border:0;border-top:1px solid #49365f;margin:16px 0}
 
 <div id="dashboard" class="hidden">
 
-<div class="card">
-<div class="row">
-<div>
-<h2 id="restaurantName">Restaurant</h2>
-<p class="small">Restaurant Partner Dashboard</p>
-</div>
+<div class="topbar">
+<div><div class="eyebrow">ZAIKABOX • PARTNER</div><h1 id="restaurantName">Restaurant</h1></div>
 <button class="secondary" id="logoutBtn" type="button">LOGOUT</button>
 </div>
-<p id="partnerMessage" class="small"></p>
-</div>
 
+<section class="page" id="page-home">
+<div class="card">
+<h2>Welcome back 👋</h2>
+<p class="small" id="partnerMessage">Your restaurant workspace</p>
+<div class="stats">
+<div class="stat"><strong>LIVE</strong><span class="small">Order connection</span></div>
+<div class="stat"><strong>MENU</strong><span class="small">Manage food items</span></div>
+</div>
+</div>
+<div class="card">
+<h2>Quick actions</h2>
+<button class="primary shortcut" type="button" data-goto="orders">🧾 &nbsp; Open Orders</button>
+<button class="secondary shortcut" type="button" data-goto="menu">🍽️ &nbsp; Manage Menu</button>
+<button class="secondary shortcut" type="button" data-goto="profile">🏪 &nbsp; Restaurant Profile</button>
+</div>
+</section>
+
+<section class="page hidden" id="page-menu">
 <div class="card">
 <div class="row">
 <h2>Menu Management</h2>
@@ -110,7 +137,9 @@ hr{border:0;border-top:1px solid #49365f;margin:16px 0}
 <h3>Your Menu Items</h3>
 <div id="menuList">Menu not loaded yet.</div>
 </div>
+</section>
 
+<section class="page hidden" id="page-orders">
 <div class="card">
 <div class="row">
 <h2>Your Orders</h2>
@@ -119,6 +148,25 @@ hr{border:0;border-top:1px solid #49365f;margin:16px 0}
 <p class="small">Live orders from your restaurant. New orders appear automatically.</p>
 <div id="ordersList">Orders loading...</div>
 </div>
+</section>
+
+<section class="page hidden" id="page-profile">
+<div class="card">
+<h2>Restaurant Profile 🏪</h2>
+<p class="small">Restaurant account connected to ZaikaBox.</p>
+<h3 id="profileRestaurantName">Restaurant</h3>
+<p class="small" id="profilePartnerEmail"></p>
+<p class="small">Account status: Active</p>
+<button class="danger" type="button" id="profileLogoutBtn">LOGOUT</button>
+</div>
+</section>
+
+<nav class="navbar" aria-label="Partner navigation">
+<button class="navbtn active" type="button" data-page="home">⌂<br>Home</button>
+<button class="navbtn" type="button" data-page="orders">▣<br>Orders</button>
+<button class="navbtn" type="button" data-page="menu">☷<br>Menu</button>
+<button class="navbtn" type="button" data-page="profile">♙<br>Profile</button>
+</nav>
 
 </div>
 </div>
@@ -166,6 +214,27 @@ let ordersUnsubscribe=null;
 function setStatus(message){
 $("globalStatus").textContent=message;
 }
+
+function showPartnerPage(page){
+const allowed=["home","orders","menu","profile"];
+if(!allowed.includes(page))page="home";
+allowed.forEach(name=>{
+$("page-"+name).classList.toggle("hidden",name!==page);
+});
+document.querySelectorAll(".navbtn").forEach(button=>{
+button.classList.toggle("active",button.dataset.page===page);
+});
+}
+
+document.querySelector(".navbar").addEventListener("click",event=>{
+const button=event.target.closest("[data-page]");
+if(button)showPartnerPage(button.dataset.page);
+});
+$("dashboard").addEventListener("click",event=>{
+const shortcut=event.target.closest("[data-goto]");
+if(shortcut)showPartnerPage(shortcut.dataset.goto);
+});
+$("profileLogoutBtn").addEventListener("click",logoutPartner);
 
 function safe(value){
 return String(value??"").replace(/[&<>"']/g,char=>({
@@ -289,7 +358,10 @@ if(restaurant.active===false)throw new Error("Restaurant inactive hai.");
 
 currentRestaurantName=restaurant.name||"Restaurant";
 $("restaurantName").textContent=currentRestaurantName;
+$("profileRestaurantName").textContent=currentRestaurantName;
+$("profilePartnerEmail").textContent="Partner email: "+(user.email||"");
 $("partnerMessage").textContent="Logged in: "+(user.email||"");
+showPartnerPage("home");
 $("dashboard").classList.remove("hidden");
 
 setStatus("Account verified. Menu and orders loading...");
