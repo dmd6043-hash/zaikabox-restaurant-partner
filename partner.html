@@ -114,6 +114,12 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 .registration-grid{display:grid;grid-template-columns:1fr;gap:0}
 .registration-note{padding:12px;border:1px solid #62421f;background:#1b130a;border-radius:13px;color:#ffc17b;font-size:12px;line-height:1.6;margin:12px 0}
 .registration-card button{width:100%;min-height:48px}
+.registration-success{display:none;margin:14px 0;padding:26px 20px;text-align:center;background:linear-gradient(145deg,#111a16,#050806);border:1px solid #267c5a;border-radius:22px;box-shadow:0 14px 34px rgba(0,0,0,.42)}
+.registration-success .success-mark{width:64px;height:64px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;background:#103b2b;color:#68e8b2;font-size:34px;font-weight:900;border:1px solid #267c5a}
+.registration-success h2{color:#75e7b5;margin:0 0 9px}
+.registration-success p{font-size:14px;color:#e6e9e7;line-height:1.7}
+.registration-success .small{margin-top:12px}
+
 .registration-link{background:transparent;border:1px solid #64401f;color:#ffb24a;width:100%;margin-top:10px}
 
 </style>
@@ -195,6 +201,15 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
     <button class="secondary" id="registerBackBtn" type="button">BACK TO LOGIN</button>
   </form>
   <p id="registrationMessage" class="small" style="margin-top:12px"></p>
+</div>
+
+<div id="registrationSuccess" class="registration-success" role="status" aria-live="polite">
+  <div class="success-mark">✓</div>
+  <h2>Thank You!</h2>
+  <p>Your registration has been submitted successfully.</p>
+  <p>Our ZaikaBox team will review your application and contact you soon.</p>
+  <p class="small">Your application is pending Super Admin approval. You cannot start operations until approval is granted.</p>
+  <button class="primary" id="successBackToLoginBtn" type="button" style="width:100%;min-height:48px;margin-top:18px">BACK TO LOGIN</button>
 </div>
 
 <div id="dashboard" class="hidden">
@@ -415,6 +430,10 @@ $("registerBackBtn").addEventListener("click",()=>{
   $("registerPanel").classList.add("hidden");
   $("loginBox").classList.remove("hidden");
 });
+$("successBackToLoginBtn").addEventListener("click",()=>{
+  $("registrationSuccess").style.display="none";
+  $("loginBox").classList.remove("hidden");
+});
 $("restaurantRegistrationForm").addEventListener("submit",async event=>{
   event.preventDefault();
   const ownerName=$("regOwnerName").value.trim();
@@ -482,14 +501,14 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
       updatedAt:serverTimestamp()
     };
     await setDoc(doc(db,"restaurantApplications",uid),application);
-    await signOut(auth);
+    try{await signOut(auth);}catch(signOutError){console.warn("Application saved; sign-out will be retried:",signOutError);}
     $("restaurantRegistrationForm").reset();
     $("registerPanel").classList.add("hidden");
-    $("loginBox").classList.remove("hidden");
+    $("loginBox").classList.add("hidden");
+    $("registrationSuccess").style.display="block";
     setStatus(fssaiNumber
       ?"Application submitted. Super Admin verification pending."
       :"Application submitted. FSSAI missing: application is on review hold.");
-    $("registrationMessage").textContent="Application submitted successfully.";
   }catch(error){
     console.error("RESTAURANT REGISTRATION ERROR:",error);
     $("registrationMessage").textContent=(error.code||"")+" - "+error.message;
