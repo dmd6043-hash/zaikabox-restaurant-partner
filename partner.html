@@ -198,7 +198,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
       <label for="regShopPhoto">Restaurant / shop front photo</label>
       <input id="regShopPhoto" type="file" accept="image/jpeg,image/png">
     </div>
-    <div class="registration-note">Masked Aadhaar, PAN card aur valid FSSAI Registration / License number with certificate mandatory hain. Aadhaar ki sirf masked copy upload karein (pehle 8 digits hidden); full Aadhaar number/card upload na karein. Documents Super Admin verification ke liye use honge. Har file maximum 5 MB. Bank details payout activate karne se pehle mandatory hongi.</div>
+    <div class="registration-note">Masked Aadhaar (pehle 8 digits hidden), PAN card aur valid FSSAI certificate WhatsApp par ZaikaBox ko bhejne honge. Full Aadhaar card/number share na karein. Form ki details Admin Dashboard mein save hongi; documents WhatsApp par applicant ke Send karne ke baad milenge. Bank details payout activate karne se pehle mandatory hongi.</div>
     <label style="display:flex;gap:9px;align-items:flex-start;font-weight:500"><input id="regConsent" type="checkbox" required style="width:20px;min-height:20px;margin:2px 0"> I confirm that the information is correct and I agree to Admin verification.</label>
     <button class="primary" id="submitRegistrationBtn" type="submit">SUBMIT APPLICATION</button>
     <button class="secondary" id="registerBackBtn" type="button">BACK TO LOGIN</button>
@@ -334,10 +334,7 @@ getAuth,signInWithEmailAndPassword,createUserWithEmailAndPassword,onAuthStateCha
 } from
 "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
-import {
-getStorage,ref as storageRef,uploadBytes
-} from
-"https://www.gstatic.com/firebasejs/12.5.0/firebase-storage.js";
+
 
 // FIREBASE CONFIG
 const firebaseConfig={
@@ -354,7 +351,7 @@ measurementId:"G-KRFFRFJY5X"
 const app=initializeApp(firebaseConfig,"ZaikaBoxPartnerApp");
 const db=getFirestore(app);
 const auth=getAuth(app);
-const storage=getStorage(app);
+
 const $=id=>document.getElementById(id);
 
 let currentRestaurantId=null;
@@ -519,55 +516,63 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
   button.classList.add("is-loading");
   button.setAttribute("aria-busy","true");
   button.innerHTML='<span class="submit-spinner" aria-hidden="true"></span><span>SUBMITTING...</span>';
-  $("registrationMessage").textContent="Account aur application create ho rahi hai...";
+  $("registrationMessage").textContent="Application details securely save ho rahi hain...";
   registrationInProgress=true;
   try{
-    const credential=await createUserWithEmailAndPassword(auth,email,password);
-    const uid=credential.user.uid;
-    const documents={};
-    const filesToUpload=Object.entries(selectedDocs).filter(([,file])=>!!file);
-    $("registrationMessage").textContent="Documents ek saath upload ho rahe hain...";
-    await Promise.all(filesToUpload.map(async([kind,file])=>{
-      const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_").slice(-90);
-      const path="restaurantApplications/"+uid+"/"+kind+"/"+Date.now()+"_"+safeName;
-      await uploadBytes(storageRef(storage,path),file,{
-        contentType:file.type,
-        customMetadata:{applicantUid:uid,documentType:kind}
-      });
-      documents[kind]=path;
-    }));
+    let user=auth.currentUser;
+    if(user && user.email!==email)throw new Error("Pehle current account se logout karein, phir registration email use karein.");
+    if(!user){
+      try{user=(await createUserWithEmailAndPassword(auth,email,password)).user;}
+      catch(authError){
+        if(authError.code!=="auth/email-already-in-use")throw authError;
+        user=(await signInWithEmailAndPassword(auth,email,password)).user;
+      }
+    }
+    const uid=user.uid;
+    const applicationRef=doc(db,"restaurantApplications",uid);
+    const existingApplication=await getDoc(applicationRef);
+    if(existingApplication.exists())throw new Error("Is email se application pehle hi submit ho chuki hai. Duplicate application nahi banayi gayi. Admin review ka wait karein.");
     const application={
-      applicantUid:uid,
-      ownerName,phone,email,restaurantName,address,city,businessType,foodType,
-      fssaiNumber,
-      fssaiProvided:true,
-      documents,
-      status:"Pending Approval",
-      bankStatus:"Not Submitted",
-      branchPolicy:"Single Restaurant Per Owner",
-      createdAt:serverTimestamp(),
-      updatedAt:serverTimestamp()
+      applicantUid:uid,ownerName,phone,email,restaurantName,address,city,businessType,foodType,
+      fssaiNumber,fssaiProvided:true,documentsSharedVia:"WhatsApp",
+      documentChecklist:{ownerId:selectedDocs.ownerId.name,pan:selectedDocs.pan.name,fssai:selectedDocs.fssai.name,shopPhoto:selectedDocs.shopPhoto?.name||""},
+      status:"Pending Approval",bankStatus:"Not Submitted",branchPolicy:"Single Restaurant Per Owner",
+      createdAt:serverTimestamp(),updatedAt:serverTimestamp()
     };
-    await setDoc(doc(db,"restaurantApplications",uid),application);
-    try{await signOut(auth);}catch(signOutError){console.warn("Application saved; sign-out will be retried:",signOutError);}
+    await setDoc(applicationRef,application);
+    const applicationText=[
+      "ZAIKABOX RESTAURANT REGISTRATION","Application ID: "+uid,"Owner: "+ownerName,
+      "Mobile: "+phone,"Email: "+email,"Restaurant: "+restaurantName,"Address: "+address,
+      "City: "+city,"Business type: "+businessType,"Food category: "+foodType,
+      "FSSAI number: "+fssaiNumber,
+      "Documents to attach: Masked Aadhaar ("+selectedDocs.ownerId.name+"), PAN ("+selectedDocs.pan.name+"), FSSAI certificate ("+selectedDocs.fssai.name+")"+(selectedDocs.shopPhoto?", Shop photo ("+selectedDocs.shopPhoto.name+")":""),
+      "Applicant consented to share these documents for verification."
+    ].join("\n");
+    $("registrationMessage").textContent="Details Admin mein save ho gayi hain. WhatsApp par documents bhejein...";
+    const files=Object.values(selectedDocs).filter(Boolean);
+    let shared=false;
+    if(navigator.share && navigator.canShare && navigator.canShare({files})){
+      try{await navigator.share({title:"ZaikaBox Restaurant Registration",text:applicationText,files});shared=true;}
+      catch(shareError){if(shareError.name!=="AbortError")console.warn("Native file share unavailable:",shareError);}
+    }
+    if(!shared){
+      window.open("https://wa.me/918319014718?text="+encodeURIComponent(applicationText+"\n\nPlease attach the selected documents in this WhatsApp chat and press Send."),"_blank","noopener");
+    }
+    try{await signOut(auth);}catch(signOutError){console.warn("Application saved; sign-out retry may be needed:",signOutError);}
     $("restaurantRegistrationForm").reset();
-    $("registerPanel").classList.add("hidden");
-    $("loginBox").classList.add("hidden");
+    $("registerPanel").classList.add("hidden");$("loginBox").classList.add("hidden");
     $("registrationSuccess").style.display="block";
-    setStatus("Application submitted. Super Admin verification pending.");
+    $("registrationSuccess").querySelector("p").textContent="Your registration details have been saved successfully.";
+    $("registrationSuccess").querySelectorAll("p")[1].textContent="WhatsApp will open so you can send the selected documents to ZaikaBox.";
+    setStatus("Application details saved. WhatsApp document sharing ready; Admin approval pending.");
   }catch(error){
     console.error("RESTAURANT REGISTRATION ERROR:",error);
     $("registrationMessage").textContent=(error.code||"")+" - "+error.message;
-    setStatus("Registration failed. Details registration form mein dekhein.");
-    if(auth.currentUser && registrationInProgress){
-      try{await signOut(auth);}catch(_){}
-    }
+    setStatus("Registration failed. Details form mein dekhein.");
+    if(auth.currentUser && registrationInProgress){try{await signOut(auth);}catch(_){}}
   }finally{
-    registrationInProgress=false;
-    button.disabled=false;
-    button.classList.remove("is-loading");
-    button.removeAttribute("aria-busy");
-    button.textContent="SUBMIT APPLICATION";
+    registrationInProgress=false;button.disabled=false;button.classList.remove("is-loading");
+    button.removeAttribute("aria-busy");button.textContent="SUBMIT APPLICATION";
   }
 });
 
