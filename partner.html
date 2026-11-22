@@ -108,7 +108,15 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 .order-empty{padding:32px 16px;text-align:center;border:1px dashed #343b45;border-radius:16px;color:#aeb4be;font-size:13px;line-height:1.7}
 .order-empty strong{display:block;color:#f5f5f5;font-size:16px;margin-bottom:5px}
 @media(max-width:370px){.order-tabs{gap:4px}.order-tab{font-size:10px;padding:10px 2px}.order-actions{flex-direction:column}}
-.order-actions button:disabled{opacity:1;filter:saturate(1.1);cursor:default}.order-card.status-accepted{border-color:#267c5a}.order-card.status-preparing{border-color:#a76524}.order-card.status-rejected{border-color:#8e3444}.order-status-pill.accepted{background:#0c2c20;color:#69e8b4;border-color:#267c5a}.order-status-pill.preparing{background:#30200f;color:#ffc17b;border-color:#a76524}.order-status-pill.rejected{background:#32121b;color:#ff8a9a;border-color:#8e3444}.reject-panel{display:none;margin-top:12px;padding:14px;border:1px solid #70402a;border-radius:15px;background:#100d0b}.reject-panel.open{display:block;animation:cardIn .2s ease}.reject-actions{display:flex;gap:8px}.reject-actions button{flex:1}.stock-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0}.stock-tab{margin:0;padding:12px;background:#0b0d11;color:#aeb4be;border:1px solid #303640;box-shadow:none}.stock-tab.active{background:linear-gradient(135deg,#ffad24,#ff7800);color:#170b00;border-color:#ff9b18}.stock-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px;margin:9px 0;border:1px solid #2b313a;border-radius:15px;background:#0b0d11}.stock-row h3{font-size:14px}.stock-row p{font-size:11px;color:#aeb4be;margin-top:4px}.stock-row button{margin:0;white-space:nowrap}.stock-empty{padding:22px;text-align:center;border:1px dashed #343b45;border-radius:15px;color:#aeb4be;font-size:12px}.prep-timer{margin-top:13px;padding:14px;border:1px solid #81501f;border-radius:14px;background:linear-gradient(120deg,#241608,#111318);text-align:center}.prep-timer-label{font-size:19px;font-weight:900;letter-spacing:.6px;color:#ffb44e;font-variant-numeric:tabular-nums}.prep-timer .small{margin-top:7px}.prep-timer button{margin-top:12px;width:100%}.order-card.status-ready{border-color:#2d9b6b}.order-status-pill.ready{background:#0d3022;color:#75e7b5;border-color:#2d9b6b}</style>
+.order-actions button:disabled{opacity:1;filter:saturate(1.1);cursor:default}.order-card.status-accepted{border-color:#267c5a}.order-card.status-preparing{border-color:#a76524}.order-card.status-rejected{border-color:#8e3444}.order-status-pill.accepted{background:#0c2c20;color:#69e8b4;border-color:#267c5a}.order-status-pill.preparing{background:#30200f;color:#ffc17b;border-color:#a76524}.order-status-pill.rejected{background:#32121b;color:#ff8a9a;border-color:#8e3444}.reject-panel{display:none;margin-top:12px;padding:14px;border:1px solid #70402a;border-radius:15px;background:#100d0b}.reject-panel.open{display:block;animation:cardIn .2s ease}.reject-actions{display:flex;gap:8px}.reject-actions button{flex:1}.stock-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0}.stock-tab{margin:0;padding:12px;background:#0b0d11;color:#aeb4be;border:1px solid #303640;box-shadow:none}.stock-tab.active{background:linear-gradient(135deg,#ffad24,#ff7800);color:#170b00;border-color:#ff9b18}.stock-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px;margin:9px 0;border:1px solid #2b313a;border-radius:15px;background:#0b0d11}.stock-row h3{font-size:14px}.stock-row p{font-size:11px;color:#aeb4be;margin-top:4px}.stock-row button{margin:0;white-space:nowrap}.stock-empty{padding:22px;text-align:center;border:1px dashed #343b45;border-radius:15px;color:#aeb4be;font-size:12px}.prep-timer{margin-top:13px;padding:14px;border:1px solid #81501f;border-radius:14px;background:linear-gradient(120deg,#241608,#111318);text-align:center}.prep-timer-label{font-size:19px;font-weight:900;letter-spacing:.6px;color:#ffb44e;font-variant-numeric:tabular-nums}.prep-timer .small{margin-top:7px}.prep-timer button{margin-top:12px;width:100%}.order-card.status-ready{border-color:#2d9b6b}.order-status-pill.ready{background:#0d3022;color:#75e7b5;border-color:#2d9b6b}
+.registration-card{margin:14px 0;padding:20px;background:linear-gradient(145deg,#11151b,#050608);border:1px solid #67431f;border-radius:22px}
+.registration-card h2{margin-bottom:6px}
+.registration-grid{display:grid;grid-template-columns:1fr;gap:0}
+.registration-note{padding:12px;border:1px solid #62421f;background:#1b130a;border-radius:13px;color:#ffc17b;font-size:12px;line-height:1.6;margin:12px 0}
+.registration-card button{width:100%;min-height:48px}
+.registration-link{background:transparent;border:1px solid #64401f;color:#ffb24a;width:100%;margin-top:10px}
+
+</style>
 </head>
 
 <body>
@@ -130,6 +138,52 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 
 <button class="primary" id="loginBtn" type="button">LOGIN</button>
 <button class="secondary hidden" id="errorLogoutBtn" type="button">LOGOUT</button>
+<button class="secondary" id="registerOpenBtn" type="button" style="width:100%;min-height:48px;margin-top:12px">REGISTER YOUR RESTAURANT</button>
+<p class="small" style="text-align:center;margin-top:9px">New restaurant owners can apply here. Activation requires Super Admin approval.</p>
+
+</div>
+
+
+<div id="registerPanel" class="registration-card hidden">
+  <div class="eyebrow">PARTNER ONBOARDING</div>
+  <h2>Register Your Restaurant</h2>
+  <p class="small">Application submit karein. Super Admin approval se pehle restaurant active nahi hoga.</p>
+  <form id="restaurantRegistrationForm">
+    <div class="registration-grid">
+      <label for="regOwnerName">Owner full name *</label>
+      <input id="regOwnerName" required maxlength="100" autocomplete="name" placeholder="Owner ka poora naam">
+      <label for="regPhone">Mobile number *</label>
+      <input id="regPhone" required type="tel" inputmode="tel" maxlength="15" placeholder="10 digit mobile number">
+      <label for="regEmail">Email address *</label>
+      <input id="regEmail" required type="email" autocomplete="email" placeholder="Owner email">
+      <label for="regPassword">Create password *</label>
+      <input id="regPassword" required type="password" minlength="8" autocomplete="new-password" placeholder="Minimum 8 characters">
+      <label for="regRestaurantName">Restaurant name *</label>
+      <input id="regRestaurantName" required maxlength="100" placeholder="Restaurant / Cafe / Cloud Kitchen name">
+      <label for="regAddress">Full restaurant address *</label>
+      <textarea id="regAddress" required maxlength="500" rows="2" placeholder="House, street, area, landmark"></textarea>
+      <label for="regCity">City *</label>
+      <input id="regCity" required maxlength="80" placeholder="City">
+      <label for="regBusinessType">Business type *</label>
+      <select id="regBusinessType" required>
+        <option value="">Select business type</option>
+        <option>Restaurant</option><option>Cafe</option><option>Fast Food</option>
+        <option>Cloud Kitchen</option><option>Bakery</option><option>Food Stall / Thela</option><option>Other</option>
+      </select>
+      <label for="regFoodType">Food category *</label>
+      <select id="regFoodType" required>
+        <option value="">Select food category</option>
+        <option>Pure Veg</option><option>Non-Veg</option><option>Both Veg & Non-Veg</option>
+      </select>
+      <label for="regFssai">FSSAI Registration / License number (if available)</label>
+      <input id="regFssai" maxlength="30" placeholder="FSSAI number, if already available">
+    </div>
+    <div class="registration-note">Aadhaar/PAN aur FSSAI certificate jaise documents Admin verification ke secure step mein liye jayenge. FSSAI details missing hone par application review mein rahegi. Bank details payout activate karne se pehle mandatory hongi.</div>
+    <label style="display:flex;gap:9px;align-items:flex-start;font-weight:500"><input id="regConsent" type="checkbox" required style="width:20px;min-height:20px;margin:2px 0"> I confirm that the information is correct and I agree to Admin verification.</label>
+    <button class="primary" id="submitRegistrationBtn" type="submit">SUBMIT APPLICATION</button>
+    <button class="secondary" id="registerBackBtn" type="button">BACK TO LOGIN</button>
+  </form>
+  <p id="registrationMessage" class="small" style="margin-top:12px"></p>
 </div>
 
 <div id="dashboard" class="hidden">
@@ -241,13 +295,13 @@ import {initializeApp} from
 "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
 
 import {
-getFirestore,collection,getDoc,getDocs,addDoc,updateDoc,
+getFirestore,collection,getDoc,getDocs,addDoc,setDoc,updateDoc,
 deleteDoc,doc,query,where,serverTimestamp,onSnapshot,writeBatch
 } from
 "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
 import {
-getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut
+getAuth,signInWithEmailAndPassword,createUserWithEmailAndPassword,onAuthStateChanged,signOut
 } from
 "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
@@ -333,6 +387,75 @@ if(code==="auth/operation-not-allowed")return "Firebase Console mein Email/Passw
 return "LOGIN ERROR: "+code+" - "+(error?.message||"Unknown error");
 }
 
+
+let registrationInProgress=false;
+$("registerOpenBtn").addEventListener("click",()=>{
+  $("registerPanel").classList.remove("hidden");
+  $("loginBox").classList.add("hidden");
+  $("registrationMessage").textContent="";
+});
+$("registerBackBtn").addEventListener("click",()=>{
+  $("registerPanel").classList.add("hidden");
+  $("loginBox").classList.remove("hidden");
+});
+$("restaurantRegistrationForm").addEventListener("submit",async event=>{
+  event.preventDefault();
+  const ownerName=$("regOwnerName").value.trim();
+  const phone=$("regPhone").value.trim();
+  const email=$("regEmail").value.trim().toLowerCase();
+  const password=$("regPassword").value;
+  const restaurantName=$("regRestaurantName").value.trim();
+  const address=$("regAddress").value.trim();
+  const city=$("regCity").value.trim();
+  const businessType=$("regBusinessType").value;
+  const foodType=$("regFoodType").value;
+  const fssaiNumber=$("regFssai").value.trim();
+  if(!/^\\+?[0-9\\s-]{10,15}$/.test(phone)){
+    $("registrationMessage").textContent="Valid mobile number bhariye.";
+    return;
+  }
+  const button=$("submitRegistrationBtn");
+  button.disabled=true;
+  button.textContent="SUBMITTING...";
+  $("registrationMessage").textContent="Account aur application create ho rahi hai...";
+  registrationInProgress=true;
+  try{
+    const credential=await createUserWithEmailAndPassword(auth,email,password);
+    const uid=credential.user.uid;
+    const application={
+      applicantUid:uid,
+      ownerName,phone,email,restaurantName,address,city,businessType,foodType,
+      fssaiNumber,
+      fssaiProvided:!!fssaiNumber,
+      status:fssaiNumber?"Pending Approval":"Pending Review",
+      bankStatus:"Not Submitted",
+      branchPolicy:"Single Restaurant Per Owner",
+      createdAt:serverTimestamp(),
+      updatedAt:serverTimestamp()
+    };
+    await setDoc(doc(db,"restaurantApplications",uid),application);
+    await signOut(auth);
+    $("restaurantRegistrationForm").reset();
+    $("registerPanel").classList.add("hidden");
+    $("loginBox").classList.remove("hidden");
+    setStatus(fssaiNumber
+      ?"Application submitted. Super Admin verification pending."
+      :"Application submitted. FSSAI missing: application is on review hold.");
+    $("registrationMessage").textContent="Application submitted successfully.";
+  }catch(error){
+    console.error("RESTAURANT REGISTRATION ERROR:",error);
+    $("registrationMessage").textContent=(error.code||"")+" - "+error.message;
+    setStatus("Registration failed. Details registration form mein dekhein.");
+    if(auth.currentUser && registrationInProgress){
+      try{await signOut(auth);}catch(_){}
+    }
+  }finally{
+    registrationInProgress=false;
+    button.disabled=false;
+    button.textContent="SUBMIT APPLICATION";
+  }
+});
+
 // LOGIN
 $("loginBtn").addEventListener("click",async()=>{
 if(loginInProgress)return;
@@ -384,6 +507,7 @@ $("errorLogoutBtn").addEventListener("click",logoutPartner);
 
 // ACCOUNT VERIFICATION
 onAuthStateChanged(auth,async user=>{
+if(registrationInProgress)return;
 const version=++authVersion;
 stopLiveOrders();
 
@@ -408,7 +532,18 @@ setStatus("Checking partner account...");
 try{
 const accountSnapshot=await getDoc(doc(db,"accounts",user.uid));
 if(version!==authVersion)return;
-if(!accountSnapshot.exists())throw new Error("accounts document nahi mila. UID: "+user.uid);
+if(!accountSnapshot.exists()){
+  const applicationSnapshot=await getDoc(doc(db,"restaurantApplications",user.uid));
+  if(version!==authVersion)return;
+  if(applicationSnapshot.exists()){
+    const application=applicationSnapshot.data();
+    const appStatus=application.status||"Pending Approval";
+    await signOut(auth);
+    setStatus("Application status: "+appStatus+". Super Admin approval ke baad hi partner dashboard activate hoga.");
+    return;
+  }
+  throw new Error("accounts document nahi mila. UID: "+user.uid);
+}
 
 const account=accountSnapshot.data();
 if(account.role!=="restaurant")throw new Error("Account role restaurant nahi hai.");
