@@ -81,6 +81,33 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 #profileLogoutBtn{width:100%;margin-top:20px}
 @media(max-width:360px){.wrap{padding:0 12px}.hero{padding:21px 17px}.hero h2{font-size:22px}.card{padding:15px}.navbtn{font-size:12px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* ZAIKABOX ORDER DESK */
+.order-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:18px 0 14px}
+.order-tab{margin:0;padding:11px 5px;border:1px solid #303640;border-radius:12px;background:#0b0d11;color:#aeb4be;font-size:11px;box-shadow:none}
+.order-tab.active{background:linear-gradient(135deg,#ffad24,#ff7800);border-color:#ff9b18;color:#170b00;box-shadow:0 5px 17px rgba(255,138,0,.18)}
+.order-tab span{display:block;font-size:10px;margin-top:3px;opacity:.8}
+.order-summary{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 15px;margin:12px 0;border:1px solid #5a3b20;border-radius:15px;background:linear-gradient(110deg,#19130d,#0a0b0e)}
+.order-summary strong{font-family:'Outfit',sans-serif;font-size:21px;color:#ffb24a}
+.order-card{background:linear-gradient(145deg,#11151b,#07080b);border:1px solid #303640;border-radius:19px;margin:13px 0;overflow:hidden;box-shadow:0 12px 28px #0008;animation:cardIn .25s ease both}
+.order-card.is-new{border-color:#9b5c20;box-shadow:0 0 0 1px #ff8a0018,0 12px 30px #0008}
+.order-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 15px;background:#14181e;border-bottom:1px solid #282e37}
+.order-head h3{font-size:15px;color:#fff;margin:0}
+.order-body{padding:15px}
+.order-meta{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px}
+.order-chip{font-size:10px;font-weight:800;letter-spacing:.3px;padding:6px 9px;border-radius:20px;background:#1b2028;border:1px solid #343b46;color:#dce0e6}
+.order-chip.orange{background:#2b1b0b;border-color:#754719;color:#ffc17b}
+.order-items{padding:12px 0;border-top:1px dashed #353b43;border-bottom:1px dashed #353b43;margin:10px 0}
+.order-item-line{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:13px;color:#f0f1f3}
+.order-item-line span:last-child{color:#c0c5cd;white-space:nowrap}
+.order-total{display:flex;justify-content:space-between;align-items:center;padding:10px 0;font-size:13px}
+.order-total strong{font-size:20px;color:#ffb24a;font-family:'Outfit',sans-serif}
+.order-customer{background:#0b0e12;border:1px solid #252c34;border-radius:13px;padding:11px 12px;margin:10px 0;font-size:12px;line-height:1.7;color:#d5d9df;overflow-wrap:anywhere}
+.order-actions{display:flex;gap:8px;margin-top:14px}
+.order-actions button{flex:1;min-height:44px;margin:0}
+.order-empty{padding:32px 16px;text-align:center;border:1px dashed #343b45;border-radius:16px;color:#aeb4be;font-size:13px;line-height:1.7}
+.order-empty strong{display:block;color:#f5f5f5;font-size:16px;margin-bottom:5px}
+@media(max-width:370px){.order-tabs{gap:4px}.order-tab{font-size:10px;padding:10px 2px}.order-actions{flex-direction:column}}
 </style>
 </head>
 
@@ -175,10 +202,16 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 <section class="page hidden" id="page-orders">
 <div class="card">
 <div class="row">
-<div><h2>Incoming Orders</h2><p class="small">Yahin par aapke restaurant ke naye customer orders aayenge.</p></div>
+<div><div class="eyebrow">ORDER MANAGEMENT</div><h2>Incoming Orders</h2><p class="small">Manage every order from one place.</p></div>
 <button class="secondary" id="refreshOrdersBtn" type="button">REFRESH</button>
 </div>
-<p class="small">Live orders from your restaurant. New orders appear automatically.</p>
+<div class="order-summary"><div><div class="small">NEW ORDERS WAITING</div><strong id="ordersWaitingCount">0</strong></div><div class="small">Live order updates</div></div>
+<div class="order-tabs" id="orderTabs">
+<button class="order-tab active" type="button" data-order-filter="New">New<span id="tabNewCount">0</span></button>
+<button class="order-tab" type="button" data-order-filter="Accepted">Accepted</button>
+<button class="order-tab" type="button" data-order-filter="Preparing">Preparing</button>
+<button class="order-tab" type="button" data-order-filter="All">All Orders</button>
+</div>
 <div id="ordersList">Orders loading...</div>
 </div>
 </section>
@@ -242,6 +275,7 @@ let authVersion=0;
 let loginInProgress=false;
 let partnerMenuItems=[];
 let partnerOrders=[];
+let currentOrderFilter="New";
 let ordersUnsubscribe=null;
 
 function setStatus(message){
@@ -574,36 +608,45 @@ $("navNewOrderCount").classList.toggle("hidden",count===0);
 }
 
 function renderOrders(){
-if(!partnerOrders.length){
-$("ordersList").innerHTML='<p class="small">Abhi koi order nahi hai. Naye order aate hi yahan dikhenge.</p>';
+const countStatus=status=>partnerOrders.filter(order=>String(order.status||"New").toLowerCase()===status.toLowerCase()).length;
+$("ordersWaitingCount").textContent=String(countStatus("New"));
+$("tabNewCount").textContent=String(countStatus("New"));
+document.querySelectorAll("[data-order-filter]").forEach(button=>button.classList.toggle("active",button.dataset.orderFilter===currentOrderFilter));
+const visible=partnerOrders.filter(order=>currentOrderFilter==="All"||String(order.status||"New").toLowerCase()===currentOrderFilter.toLowerCase());
+if(!visible.length){
+const message=currentOrderFilter==="New"?"No new orders right now. New customer orders will appear here automatically.":"No "+currentOrderFilter.toLowerCase()+" orders to show.";
+$("ordersList").innerHTML='<div class="order-empty"><strong>'+safe(message)+'</strong>Keep this screen open to receive live orders.</div>';
 return;
 }
-
-$("ordersList").innerHTML=partnerOrders.map(order=>{
-const items=Array.isArray(order.items)
-?order.items.map(item=>`${safe(item.name||"Item")} × ${safe(item.quantity||item.qty||1)}`).join("<br>")
-:safe(order.items||"Items unavailable");
+$("ordersList").innerHTML=visible.map(order=>{
+const lines=Array.isArray(order.items)?order.items.map(item=>{
+const qty=Number(item.quantity||item.qty||1);
+return '<div class="order-item-line"><span>'+safe(item.name||"Food item")+' × '+safe(qty)+'</span><span>₹'+safe(item.price??item.subtotal??"—")+'</span></div>';
+}).join(""):'<div class="order-item-line">'+safe(order.items||"Items unavailable")+'</div>';
 const date=order.createdAt?.toDate?order.createdAt.toDate().toLocaleString("en-IN"):"Time unavailable";
 const status=order.status||"New";
-
-return `
-<div class="order">
-<h3>Order #${safe(order.id.slice(0,8))}</h3>
-<p><b>Customer:</b> ${safe(order.customerName||"Customer")}</p>
-<p><b>Phone:</b> ${safe(order.customerPhone||order.phone||"")}</p>
-<p><b>Items:</b><br>${items}</p>
-<p><b>Total:</b> ₹${safe(order.total??order.grandTotal??0)}</p>
-<p><b>Address:</b> ${safe(order.address||"Pickup")}</p>
-<p><b>Status:</b> <span class="tag">${safe(status)}</span></p>
-<p class="small">${safe(date)}</p>
-<div class="order-buttons">
-<button class="success" data-order="${safe(order.id)}" data-status="Accepted">ACCEPT</button>
-<button class="danger" data-order="${safe(order.id)}" data-status="Rejected">REJECT</button>
-<button class="secondary" data-order="${safe(order.id)}" data-status="Preparing">PREPARING</button>
-</div>
-</div>`;
+const isNew=String(status).toLowerCase()==="new";
+const payment=String(order.paymentMethod||"Not specified").toUpperCase();
+const payStatus=String(order.paymentStatus||"Pending");
+const orderType=String(order.orderType||order.deliveryType||order.fulfillmentType||(String(order.address||"").toLowerCase()==="pickup"?"Pickup":"Delivery"));
+const total=order.total??order.grandTotal??order.amount??0;
+let actions="";
+if(isNew){
+actions='<div class="order-actions"><button class="success" data-order="'+safe(order.id)+'" data-status="Accepted">ACCEPT ORDER</button><button class="danger" data-order="'+safe(order.id)+'" data-status="Rejected">REJECT</button></div>';
+}else if(String(status).toLowerCase()==="accepted"){
+actions='<div class="order-actions"><button class="primary" data-order="'+safe(order.id)+'" data-status="Preparing">START PREPARING</button></div>';
+}else if(String(status).toLowerCase()==="preparing"){
+actions='<div class="small">Order is being prepared.</div>';
+}
+return '<article class="order-card '+(isNew?'is-new':'')+'"><div class="order-head"><h3>ORDER #'+safe(order.id.slice(0,8).toUpperCase())+'</h3><span class="tag">'+safe(status.toUpperCase())+'</span></div><div class="order-body"><div class="order-meta"><span class="order-chip orange">'+safe(orderType.toUpperCase())+'</span><span class="order-chip">'+safe(payment)+'</span><span class="order-chip">PAYMENT: '+safe(payStatus.toUpperCase())+'</span></div><div class="order-items">'+lines+'</div><div class="order-total"><span>Order total</span><strong>₹'+safe(total)+'</strong></div><div class="order-customer"><b>CUSTOMER</b><br>'+safe(order.customerName||order.name||"Customer")+'<br>'+safe(order.customerPhone||order.phone||"Phone not available")+'<br>'+safe(order.address||"Pickup order")+'</div><p class="small">'+safe(date)+'</p>'+actions+'</div></article>';
 }).join("");
 }
+$("orderTabs").addEventListener("click",event=>{
+const button=event.target.closest("[data-order-filter]");
+if(!button)return;
+currentOrderFilter=button.dataset.orderFilter;
+renderOrders();
+});
 
 // ORDER STATUS UPDATE — ONLY STATUS FIELD
 $("ordersList").addEventListener("click",async event=>{
