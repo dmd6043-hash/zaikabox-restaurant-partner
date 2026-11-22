@@ -534,9 +534,15 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
     if(existingApplication.exists())throw new Error("Is email se application pehle hi submit ho chuki hai. Duplicate application nahi banayi gayi. Admin review ka wait karein.");
     const application={
       applicantUid:uid,ownerName,phone,email,restaurantName,address,city,businessType,foodType,
-      fssaiNumber,fssaiProvided:true,documentsSharedVia:"WhatsApp",
-      documentChecklist:{ownerId:selectedDocs.ownerId.name,pan:selectedDocs.pan.name,fssai:selectedDocs.fssai.name,shopPhoto:selectedDocs.shopPhoto?.name||""},
-      status:"Pending Approval",bankStatus:"Not Submitted",branchPolicy:"Single Restaurant Per Owner",
+      fssaiNumber,fssaiProvided:fssaiNumber.trim().length>0,
+      documents:{
+        ownerId:selectedDocs.ownerId.name,
+        pan:selectedDocs.pan.name,
+        fssai:selectedDocs.fssai.name,
+        ...(selectedDocs.shopPhoto?{shopPhoto:selectedDocs.shopPhoto.name}:{})
+      },
+      status:fssaiNumber.trim().length>0?"Pending Approval":"Pending Review",
+      bankStatus:"Not Submitted",branchPolicy:"Single Restaurant Per Owner",
       createdAt:serverTimestamp(),updatedAt:serverTimestamp()
     };
     await setDoc(applicationRef,application);
