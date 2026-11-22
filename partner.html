@@ -206,6 +206,30 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
   <p id="registrationMessage" class="small" style="margin-top:12px"></p>
 </div>
 
+<div id="correctionPanel" class="registration-card hidden">
+  <div class="eyebrow">APPLICATION UPDATE</div>
+  <h2>✎ Edit Registration</h2>
+  <p class="small">Super Admin ne correction maanga hai. Details sudhar kar dobara submit karein.</p>
+  <div class="card"><b>Correction reason</b><p id="correctionReasonText" class="small"></p></div>
+  <form id="correctionForm">
+    <label>Owner full name *</label><input id="fixOwnerName" required maxlength="100">
+    <label>Mobile number *</label><input id="fixPhone" required maxlength="15">
+    <label>Restaurant name *</label><input id="fixRestaurantName" required maxlength="100">
+    <label>Restaurant address *</label><textarea id="fixAddress" required maxlength="500"></textarea>
+    <label>City *</label><input id="fixCity" required maxlength="80">
+    <label>Business type *</label><input id="fixBusinessType" required maxlength="80">
+    <label>Food category *</label><select id="fixFoodType" required><option>Pure Veg</option><option>Non-Veg</option><option>Both Veg & Non-Veg</option></select>
+    <label>FSSAI number</label><input id="fixFssai" maxlength="30">
+    <p class="small">Agar document dobara dena hai to nayi file select karein. File Firebase mein upload nahi hoti; WhatsApp par manually attach karni hogi.</p>
+    <label>Masked Aadhaar (optional)</label><input id="fixOwnerIdDoc" type="file" accept="image/jpeg,image/png,application/pdf">
+    <label>PAN card (optional)</label><input id="fixPanDoc" type="file" accept="image/jpeg,image/png,application/pdf">
+    <label>FSSAI certificate (optional)</label><input id="fixFssaiDoc" type="file" accept="image/jpeg,image/png,application/pdf">
+    <label>Shop photo (optional)</label><input id="fixShopPhoto" type="file" accept="image/jpeg,image/png">
+    <button class="primary" id="resubmitCorrectionBtn" type="submit" style="width:100%">SAVE &amp; RESUBMIT FOR APPROVAL</button>
+    <button class="secondary" id="correctionLogoutBtn" type="button" style="width:100%">LOGOUT</button>
+  </form>
+</div>
+
 <div id="registrationSuccess" class="registration-success" role="status" aria-live="polite">
   <div class="success-mark">✓</div>
   <h2>Thank You!</h2>
@@ -589,6 +613,85 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
   }
 });
 
+let correctionApplication=null;
+function showCorrectionApplication(application){
+  correctionApplication=application;
+  $("loginBox").classList.add("hidden");
+  $("registerPanel").classList.add("hidden");
+  $("registrationSuccess").style.display="none";
+  $("correctionPanel").classList.remove("hidden");
+  $("correctionReasonText").textContent=application.correctionReason||"Please review and correct your registration details.";
+  $("fixOwnerName").value=application.ownerName||"";
+  $("fixPhone").value=application.phone||"";
+  $("fixRestaurantName").value=application.restaurantName||"";
+  $("fixAddress").value=application.address||"";
+  $("fixCity").value=application.city||"";
+  $("fixBusinessType").value=application.businessType||"";
+  $("fixFoodType").value=application.foodType||"Pure Veg";
+  $("fixFssai").value=application.fssaiNumber||"";
+  setStatus("Correction Required: Details edit karein aur dobara submit karein.");
+}
+$("correctionLogoutBtn").addEventListener("click",logoutPartner);
+$("correctionForm").addEventListener("submit",async event=>{
+  event.preventDefault();
+  const user=auth.currentUser;
+  if(!user||!correctionApplication){setStatus("Please dobara login karein.");return;}
+  const button=$("resubmitCorrectionBtn");
+  const ownerName=$("fixOwnerName").value.trim();
+  const phone=$("fixPhone").value.trim();
+  const restaurantName=$("fixRestaurantName").value.trim();
+  const address=$("fixAddress").value.trim();
+  const city=$("fixCity").value.trim();
+  const businessType=$("fixBusinessType").value.trim();
+  const foodType=$("fixFoodType").value;
+  const fssaiNumber=$("fixFssai").value.trim();
+  const files={
+    ownerId:$("fixOwnerIdDoc").files[0],
+    pan:$("fixPanDoc").files[0],
+    fssai:$("fixFssaiDoc").files[0],
+    shopPhoto:$("fixShopPhoto").files[0]
+  };
+  const allowed=["image/jpeg","image/png","application/pdf"];
+  for(const [key,file] of Object.entries(files)){
+    if(!file)continue;
+    if(file.size>5*1024*1024||!allowed.includes(file.type)||(key==="shopPhoto"&&file.type==="application/pdf")){
+      setStatus("Selected document invalid hai. Maximum 5 MB; JPG/PNG/PDF allowed (shop photo JPG/PNG).");return;
+    }
+  }
+  if(!/^\\+?[1-9]\\d{6,14}$/.test(phone.replace(/[\\s().-]/g,""))){
+    setStatus("Valid mobile number country code ke saath bhariye.");return;
+  }
+  const documents={...(correctionApplication.documents||{})};
+  for(const [key,file] of Object.entries(files))if(file)documents[key]=file.name;
+  button.disabled=true;button.textContent="RESUBMITTING...";
+  try{
+    const nextStatus=fssaiNumber?"Pending Approval":"Pending Review";
+    await updateDoc(doc(db,"restaurantApplications",user.uid),{
+      ownerName,phone,restaurantName,address,city,businessType,foodType,
+      fssaiNumber,fssaiProvided:fssaiNumber.length>0,documents,status:nextStatus,
+      updatedAt:serverTimestamp(),resubmittedAt:serverTimestamp()
+    });
+    const message=[
+      "ZAIKABOX CORRECTED RESTAURANT APPLICATION",
+      "Application ID: "+user.uid,"Owner: "+ownerName,"Mobile: "+phone,
+      "Restaurant: "+restaurantName,"Address: "+address,"City: "+city,
+      "Business type: "+businessType,"Food category: "+foodType,
+      "FSSAI number: "+fssaiNumber,
+      "Please verify the corrected details. I will attach any replacement documents in this WhatsApp chat."
+    ].join("\\n");
+    const wa="https://wa.me/918319014718?text="+encodeURIComponent(message);
+    $("correctionPanel").classList.add("hidden");
+    $("loginBox").classList.remove("hidden");
+    await signOut(auth);
+    setStatus("Application resubmitted successfully. WhatsApp mein replacement documents attach karein: "+wa);
+    window.location.href=wa;
+  }catch(error){
+    console.error(error);setStatus("Correction save error: "+(error.code||"")+" "+error.message);
+  }finally{
+    button.disabled=false;button.textContent="SAVE & RESUBMIT FOR APPROVAL";
+  }
+});
+
 // LOGIN
 $("loginBtn").addEventListener("click",async()=>{
 if(loginInProgress)return;
@@ -671,6 +774,10 @@ if(!accountSnapshot.exists()){
   if(applicationSnapshot.exists()){
     const application=applicationSnapshot.data();
     const appStatus=application.status||"Pending Approval";
+    if(appStatus==="Correction Required"){
+      showCorrectionApplication(application);
+      return;
+    }
     await signOut(auth);
     setStatus("Application status: "+appStatus+". Super Admin approval ke baad hi partner dashboard activate hoga.");
     return;
