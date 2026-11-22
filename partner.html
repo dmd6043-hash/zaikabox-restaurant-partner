@@ -159,7 +159,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
       <label for="regOwnerName">Owner full name *</label>
       <input id="regOwnerName" required maxlength="100" autocomplete="name" placeholder="Owner ka poora naam">
       <label for="regPhone">Mobile number *</label>
-      <input id="regPhone" required type="tel" inputmode="tel" maxlength="15" placeholder="10 digit mobile number">
+      <input id="regPhone" required type="tel" inputmode="tel" maxlength="25" autocomplete="tel" placeholder="Country code + mobile number (e.g. +1 202 555 0123)">
       <label for="regEmail">Email address *</label>
       <input id="regEmail" required type="email" autocomplete="email" placeholder="Owner email">
       <label for="regPassword">Create password *</label>
@@ -506,9 +506,9 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
       return;
     }
   }
-  const phoneDigits=phone.replace(/[\s-]/g,"");
-  if(!/^(?:(?:\+?91)|0)?[6-9]\d{9}$/.test(phoneDigits)){
-    $("registrationMessage").textContent="Valid 10-digit Indian mobile number bhariye. +91 ya 0 prefix bhi chalega.";
+  const phoneDigits=phone.replace(/[\s().-]/g,"");
+  if(!/^\+?[1-9]\d{6,14}$/.test(phoneDigits)){
+    $("registrationMessage").textContent="Valid international mobile number bhariye, country code ke saath (7–15 digits). Example: +1 202 555 0123.";
     return;
   }
   const button=$("submitRegistrationBtn");
