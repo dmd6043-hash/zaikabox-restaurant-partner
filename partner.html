@@ -114,6 +114,9 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 .registration-grid{display:grid;grid-template-columns:1fr;gap:0}
 .registration-note{padding:12px;border:1px solid #62421f;background:#1b130a;border-radius:13px;color:#ffc17b;font-size:12px;line-height:1.6;margin:12px 0}
 .registration-card button{width:100%;min-height:48px}
+#submitRegistrationBtn.is-loading{display:flex;align-items:center;justify-content:center;gap:10px;opacity:1;cursor:wait}
+.submit-spinner{width:17px;height:17px;display:inline-block;border:2px solid rgba(22,11,0,.28);border-top-color:#160b00;border-radius:50%;animation:submitSpin .7s linear infinite;flex:0 0 auto}
+@keyframes submitSpin{to{transform:rotate(360deg)}}
 .registration-success{display:none;margin:14px 0;padding:26px 20px;text-align:center;background:linear-gradient(145deg,#111a16,#050806);border:1px solid #267c5a;border-radius:22px;box-shadow:0 14px 34px rgba(0,0,0,.42)}
 .registration-success .success-mark{width:64px;height:64px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;background:#103b2b;color:#68e8b2;font-size:34px;font-weight:900;border:1px solid #267c5a}
 .registration-success h2{color:#75e7b5;margin:0 0 9px}
@@ -513,7 +516,9 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
   }
   const button=$("submitRegistrationBtn");
   button.disabled=true;
-  button.textContent="SUBMITTING...";
+  button.classList.add("is-loading");
+  button.setAttribute("aria-busy","true");
+  button.innerHTML='<span class="submit-spinner" aria-hidden="true"></span><span>SUBMITTING...</span>';
   $("registrationMessage").textContent="Account aur application create ho rahi hai...";
   registrationInProgress=true;
   try{
@@ -559,6 +564,8 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
   }finally{
     registrationInProgress=false;
     button.disabled=false;
+    button.classList.remove("is-loading");
+    button.removeAttribute("aria-busy");
     button.textContent="SUBMIT APPLICATION";
   }
 });
