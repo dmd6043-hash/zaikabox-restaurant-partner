@@ -658,7 +658,7 @@ $("correctionForm").addEventListener("submit",async event=>{
       setStatus("Selected document invalid hai. Maximum 5 MB; JPG/PNG/PDF allowed (shop photo JPG/PNG).");return;
     }
   }
-  if(!/^\\+?[1-9]\\d{6,14}$/.test(phone.replace(/[\\s().-]/g,""))){
+  if(!/^\+?[1-9]\d{6,14}$/.test(phone.replace(/[\s().-]/g,""))){
     setStatus("Valid mobile number country code ke saath bhariye.");return;
   }
   const documents={...(correctionApplication.documents||{})};
@@ -678,7 +678,7 @@ $("correctionForm").addEventListener("submit",async event=>{
       "Business type: "+businessType,"Food category: "+foodType,
       "FSSAI number: "+fssaiNumber,
       "Please verify the corrected details. I will attach any replacement documents in this WhatsApp chat."
-    ].join("\\n");
+    ].join("\n");
     const wa="https://wa.me/918319014718?text="+encodeURIComponent(message);
     $("correctionPanel").classList.add("hidden");
     $("loginBox").classList.remove("hidden");
