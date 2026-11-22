@@ -1,4 +1,4 @@
-const CACHE_NAME = "zaikabox-restaurant-partner-v15";
+const CACHE_NAME = "zaikabox-restaurant-partner-v16";
 const APP_SHELL = ["./partner.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
