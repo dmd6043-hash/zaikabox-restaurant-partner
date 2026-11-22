@@ -76,7 +76,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 .navbar{position:fixed;z-index:30;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:620px;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:9px 8px calc(9px + env(safe-area-inset-bottom));background:rgba(5,6,8,.98);border-top:1px solid #252a31;backdrop-filter:blur(20px)}
 .navbtn{margin:0;min-height:52px;padding:7px 3px;background:transparent;color:#9298a2;border:1px solid transparent;box-shadow:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12px;line-height:1.1}
 .navbtn small{font-size:10px;font-weight:800}
-.navbtn.active{color:#ffad42;background:rgba(255,138,0,.08);border-color:rgba(255,138,0,.2);box-shadow:0 0 18px rgba(255,138,0,.06);transform:translateY(-2px)}
+.order-count{font-size:10px;font-weight:800;color:#ffb35e;background:rgba(255,138,0,.12);border:1px solid rgba(255,138,0,.25);padding:5px 8px;border-radius:30px}.nav-count{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;padding:0 5px;border-radius:20px;background:#ff8a00;color:#140900;font-size:10px;font-weight:900}.navbtn.active{color:#ffad42;background:rgba(255,138,0,.08);border-color:rgba(255,138,0,.2);box-shadow:0 0 18px rgba(255,138,0,.06);transform:translateY(-2px)}
 #profileRestaurantName{font-size:22px;color:var(--orange2);margin:12px 0}
 #profileLogoutBtn{width:100%;margin-top:20px}
 @media(max-width:360px){.wrap{padding:0 12px}.hero{padding:21px 17px}.hero h2{font-size:22px}.card{padding:15px}.navbtn{font-size:12px}}
@@ -124,7 +124,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 </div>
 <div class="card">
 <h2>Quick actions</h2>
-<button class="primary shortcut" type="button" data-goto="orders"> <span>Open Orders</span> <span style="margin-left:auto">›</span></button>
+<button class="primary shortcut" type="button" data-goto="orders"> <span>Incoming Orders</span> <span id="homeNewOrderCount" class="order-count">0 NEW</span> <span style="margin-left:auto">›</span></button>
 <button class="secondary shortcut" type="button" data-goto="menu"> <span>Manage Menu</span> <span style="margin-left:auto">›</span></button>
 <button class="secondary shortcut" type="button" data-goto="profile"> <span>Restaurant Profile</span> <span style="margin-left:auto">›</span></button>
 </div>
@@ -175,7 +175,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 <section class="page hidden" id="page-orders">
 <div class="card">
 <div class="row">
-<h2>Your Orders</h2>
+<div><h2>Incoming Orders</h2><p class="small">Yahin par aapke restaurant ke naye customer orders aayenge.</p></div>
 <button class="secondary" id="refreshOrdersBtn" type="button">REFRESH</button>
 </div>
 <p class="small">Live orders from your restaurant. New orders appear automatically.</p>
@@ -196,7 +196,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 
 <nav class="navbar" aria-label="Partner navigation">
 <button class="navbtn active" type="button" data-page="home"><small>Home</small></button>
-<button class="navbtn" type="button" data-page="orders"><small>Orders</small></button>
+<button class="navbtn" type="button" data-page="orders"><small>New Orders</small><span id="navNewOrderCount" class="nav-count">0</span></button>
 <button class="navbtn" type="button" data-page="menu"><small>Menu</small></button>
 <button class="navbtn" type="button" data-page="profile"><small>Profile</small></button>
 </nav>
@@ -557,12 +557,20 @@ const ordersQuery=query(collection(db,"orders"),where("restaurantId","==",curren
 ordersUnsubscribe=onSnapshot(ordersQuery,snapshot=>{
 partnerOrders=snapshot.docs.map(item=>({id:item.id,...item.data()})).filter(order=>order.paymentMethod==="COD" || order.paymentStatus==="Paid" || !order.paymentStatus);
 partnerOrders.sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));
+updateIncomingOrderCount();
 renderOrders();
 },error=>{
 console.error("LIVE ORDERS ERROR:",error);
 $("ordersList").textContent="LIVE ORDERS ERROR: "+(error.code||"")+" "+error.message;
 setStatus("Live order listener error: "+error.message);
 });
+}
+
+function updateIncomingOrderCount(){
+const count=partnerOrders.filter(order=>String(order.status||"New").toLowerCase()==="new").length;
+$("navNewOrderCount").textContent=String(count);
+$("homeNewOrderCount").textContent=count+" NEW";
+$("navNewOrderCount").classList.toggle("hidden",count===0);
 }
 
 function renderOrders(){
