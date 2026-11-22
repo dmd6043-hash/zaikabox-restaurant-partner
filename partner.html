@@ -83,7 +83,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
 /* ZAIKABOX ORDER DESK */
-.order-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:18px 0 14px}
+.order-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin:18px 0 14px}
 .order-tab{margin:0;padding:11px 5px;border:1px solid #303640;border-radius:12px;background:#0b0d11;color:#aeb4be;font-size:11px;box-shadow:none}
 .order-tab.active{background:linear-gradient(135deg,#ffad24,#ff7800);border-color:#ff9b18;color:#170b00;box-shadow:0 5px 17px rgba(255,138,0,.18)}
 .order-tab span{display:block;font-size:10px;margin-top:3px;opacity:.8}
@@ -108,7 +108,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 .order-empty{padding:32px 16px;text-align:center;border:1px dashed #343b45;border-radius:16px;color:#aeb4be;font-size:13px;line-height:1.7}
 .order-empty strong{display:block;color:#f5f5f5;font-size:16px;margin-bottom:5px}
 @media(max-width:370px){.order-tabs{gap:4px}.order-tab{font-size:10px;padding:10px 2px}.order-actions{flex-direction:column}}
-.order-actions button:disabled{opacity:1;filter:saturate(1.1);cursor:default}.order-card.status-accepted{border-color:#267c5a}.order-card.status-preparing{border-color:#a76524}.order-card.status-rejected{border-color:#8e3444}.order-status-pill.accepted{background:#0c2c20;color:#69e8b4;border-color:#267c5a}.order-status-pill.preparing{background:#30200f;color:#ffc17b;border-color:#a76524}.order-status-pill.rejected{background:#32121b;color:#ff8a9a;border-color:#8e3444}.reject-panel{display:none;margin-top:12px;padding:14px;border:1px solid #70402a;border-radius:15px;background:#100d0b}.reject-panel.open{display:block;animation:cardIn .2s ease}.reject-actions{display:flex;gap:8px}.reject-actions button{flex:1}.stock-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0}.stock-tab{margin:0;padding:12px;background:#0b0d11;color:#aeb4be;border:1px solid #303640;box-shadow:none}.stock-tab.active{background:linear-gradient(135deg,#ffad24,#ff7800);color:#170b00;border-color:#ff9b18}.stock-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px;margin:9px 0;border:1px solid #2b313a;border-radius:15px;background:#0b0d11}.stock-row h3{font-size:14px}.stock-row p{font-size:11px;color:#aeb4be;margin-top:4px}.stock-row button{margin:0;white-space:nowrap}.stock-empty{padding:22px;text-align:center;border:1px dashed #343b45;border-radius:15px;color:#aeb4be;font-size:12px}</style>
+.order-actions button:disabled{opacity:1;filter:saturate(1.1);cursor:default}.order-card.status-accepted{border-color:#267c5a}.order-card.status-preparing{border-color:#a76524}.order-card.status-rejected{border-color:#8e3444}.order-status-pill.accepted{background:#0c2c20;color:#69e8b4;border-color:#267c5a}.order-status-pill.preparing{background:#30200f;color:#ffc17b;border-color:#a76524}.order-status-pill.rejected{background:#32121b;color:#ff8a9a;border-color:#8e3444}.reject-panel{display:none;margin-top:12px;padding:14px;border:1px solid #70402a;border-radius:15px;background:#100d0b}.reject-panel.open{display:block;animation:cardIn .2s ease}.reject-actions{display:flex;gap:8px}.reject-actions button{flex:1}.stock-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0}.stock-tab{margin:0;padding:12px;background:#0b0d11;color:#aeb4be;border:1px solid #303640;box-shadow:none}.stock-tab.active{background:linear-gradient(135deg,#ffad24,#ff7800);color:#170b00;border-color:#ff9b18}.stock-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px;margin:9px 0;border:1px solid #2b313a;border-radius:15px;background:#0b0d11}.stock-row h3{font-size:14px}.stock-row p{font-size:11px;color:#aeb4be;margin-top:4px}.stock-row button{margin:0;white-space:nowrap}.stock-empty{padding:22px;text-align:center;border:1px dashed #343b45;border-radius:15px;color:#aeb4be;font-size:12px}.prep-timer{margin-top:13px;padding:14px;border:1px solid #81501f;border-radius:14px;background:linear-gradient(120deg,#241608,#111318);text-align:center}.prep-timer-label{font-size:19px;font-weight:900;letter-spacing:.6px;color:#ffb44e;font-variant-numeric:tabular-nums}.prep-timer .small{margin-top:7px}.prep-timer button{margin-top:12px;width:100%}.order-card.status-ready{border-color:#2d9b6b}.order-status-pill.ready{background:#0d3022;color:#75e7b5;border-color:#2d9b6b}</style>
 </head>
 
 <body>
@@ -208,7 +208,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 <div class="order-tabs" id="orderTabs">
 <button class="order-tab active" type="button" data-order-filter="New">New<span id="tabNewCount">0</span></button>
 <button class="order-tab" type="button" data-order-filter="Accepted">Accepted</button>
-<button class="order-tab" type="button" data-order-filter="Preparing">Preparing</button>
+<button class="order-tab" type="button" data-order-filter="Preparing">Preparing</button><button class="order-tab" type="button" data-order-filter="Ready">Ready</button>
 <button class="order-tab" type="button" data-order-filter="All">All Orders</button>
 </div>
 <div id="ordersList">Orders loading...</div><div id="rejectDialog" class="reject-panel" role="dialog" aria-label="Reject order reason"><h3>Reject Order</h3><p class="small">Customer ko genuine reason select karke batayein.</p><label for="rejectReason">Reason</label><select id="rejectReason"><option value="">Select reason</option><option>Item out of stock</option><option>Restaurant is currently full / high order volume</option><option>Restaurant is near closing time</option><option>Temporary kitchen/equipment issue</option><option>Delivery/pickup service unavailable</option><option>Other</option></select><label for="rejectNote">Extra note (optional)</label><textarea id="rejectNote" rows="2" maxlength="180" placeholder="Short explanation"></textarea><div class="reject-actions"><button type="button" class="secondary" id="cancelRejectBtn">CANCEL</button><button type="button" class="danger" id="confirmRejectBtn">CONFIRM REJECTION</button></div></div>
@@ -595,6 +595,43 @@ $("homeNewOrderCount").textContent=count+" NEW";
 $("navNewOrderCount").classList.toggle("hidden",count===0);
 }
 
+function estimatePrepMinutes(order){
+const items=Array.isArray(order.items)?order.items:[];
+if(!items.length)return 15;
+const durations=items.map(item=>{
+if(Number(item.prepTimeMinutes)>0)return Math.min(30,Math.max(5,Number(item.prepTimeMinutes)));
+const name=String(item.name||"").toLowerCase();
+if(/momo|gupchup|golgappa|pani puri|chaat|tikki|fries|french fry/.test(name))return 8;
+if(/roll|sandwich|noodle|chilli|chowmein|manchurian|burger/.test(name))return 15;
+if(/biryani|pizza|thali|chaap|platter|fried rice/.test(name))return 25;
+return 15;
+});
+let duration=Math.max(...durations);
+const quantity=items.reduce((sum,item)=>sum+Number(item.quantity||item.qty||1),0);
+if(quantity>=6)duration+=5;
+return Math.min(30,Math.max(5,duration));
+}
+function refreshPrepTimers(){
+document.querySelectorAll("[data-prep-timer]").forEach(el=>{
+const readyAt=Number(el.dataset.readyAt||0);
+if(!readyAt)return;
+const remaining=Math.max(0,Math.ceil((readyAt-Date.now())/1000));
+const mins=Math.floor(remaining/60),secs=remaining%60;
+const id=el.dataset.prepTimer;
+const order=partnerOrders.find(item=>item.id===id);
+if(!order)return;
+const type=String(order.orderType||order.deliveryType||order.fulfillmentType||"Delivery").toLowerCase().includes("pickup")?"PICKUP":"DELIVERY";
+el.querySelector(".prep-timer-label").textContent=remaining>0?"PREPARING · "+mins+":"+String(secs).padStart(2,"0")+" LEFT":"TIME UP · CHECK FOOD";
+const small=el.querySelector(".small");
+if(remaining===0){
+small.textContent="Food check karne ke baad Ready mark karein.";
+if(!el.querySelector("[data-mark-ready]")){
+const btn=document.createElement("button");btn.className="success";btn.dataset.markReady=id;btn.textContent="MARK READY FOR "+type;el.appendChild(btn);
+}
+}
+});
+}
+if(!window.zaikaPrepTimer){window.zaikaPrepTimer=setInterval(refreshPrepTimers,1000);}
 function renderOrders(){
 const countStatus=status=>partnerOrders.filter(order=>String(order.status||"New").toLowerCase()===status.toLowerCase()).length;
 $("ordersWaitingCount").textContent=String(countStatus("New"));$("tabNewCount").textContent=String(countStatus("New"));
@@ -605,8 +642,15 @@ $("ordersList").innerHTML=visible.map(order=>{
 const lines=Array.isArray(order.items)?order.items.map(item=>'<div class="order-item-line"><span>'+safe(item.name||"Food item")+' × '+safe(item.quantity||item.qty||1)+'</span><span>₹'+safe(item.price??item.subtotal??"—")+'</span></div>').join(""):'<div class="order-item-line">'+safe(order.items||"Items unavailable")+'</div>';
 const date=order.createdAt?.toDate?order.createdAt.toDate().toLocaleString("en-IN"):"Time unavailable";const status=order.status||"New";const normalized=String(status).toLowerCase();const isNew=normalized==="new";const payment=String(order.paymentMethod||"Not specified").toUpperCase();const payStatus=String(order.paymentStatus||"Pending");const orderType=String(order.orderType||order.deliveryType||order.fulfillmentType||(String(order.address||"").toLowerCase()==="pickup"?"Pickup":"Delivery"));const total=order.total??order.grandTotal??order.amount??0;let actions="";
 if(isNew)actions='<div class="order-actions"><button class="success" data-order="'+safe(order.id)+'" data-status="Accepted">ACCEPT ORDER</button><button class="danger" data-reject-order="'+safe(order.id)+'">REJECT ORDER</button></div>';
-else if(normalized==="accepted")actions='<div class="order-actions"><button class="success" disabled>✓ ACCEPTED</button><button class="primary" data-order="'+safe(order.id)+'" data-status="Preparing">START PREPARING</button></div>';
-else if(normalized==="preparing")actions='<div class="order-actions"><button class="success" disabled>✓ PREPARING</button></div>';
+else if(normalized==="accepted"||normalized==="preparing"){
+const eta=Number(order.prepDurationMinutes||15);
+const readyAt=order.estimatedReadyAt?.toMillis?order.estimatedReadyAt.toMillis():(order.estimatedReadyAt?.seconds?order.estimatedReadyAt.seconds*1000:0);
+const remaining=readyAt?Math.max(0,Math.ceil((readyAt-Date.now())/1000)):eta*60;
+const mins=Math.floor(remaining/60),secs=remaining%60;
+const timerText=remaining>0?("PREPARING · "+mins+":"+String(secs).padStart(2,"0")+" LEFT"):"TIME UP · CHECK FOOD";
+actions='<div class="prep-timer" data-prep-timer="'+safe(order.id)+'" data-ready-at="'+safe(readyAt)+'"><div class="prep-timer-label">'+timerText+'</div><div class="small">Estimated preparation time: '+safe(eta)+' minutes</div>'+(remaining===0?'<button class="success" data-mark-ready="'+safe(order.id)+'">MARK READY FOR '+(orderType.toLowerCase().includes("pickup")?"PICKUP":"DELIVERY")+'</button>':'<div class="small">Timer complete hone par food check karke ready mark karein.</div>')+'</div>';
+}
+else if(normalized==="ready")actions='<div class="order-actions"><button class="success" disabled>✓ READY FOR '+(orderType.toLowerCase().includes("pickup")?"PICKUP":"DELIVERY")+'</button></div>';
 else if(normalized==="rejected")actions='<div class="small">Rejected reason: '+safe(order.rejectionReason||"Not recorded")+'</div>';
 return '<article class="order-card '+(isNew?"is-new":"")+' status-'+safe(normalized)+'"><div class="order-head"><h3>ORDER #'+safe(order.id.slice(0,8).toUpperCase())+'</h3><span class="tag order-status-pill '+safe(normalized)+'">'+safe(status.toUpperCase())+'</span></div><div class="order-body"><div class="order-meta"><span class="order-chip orange">'+safe(orderType.toUpperCase())+'</span><span class="order-chip">'+safe(payment)+'</span><span class="order-chip">PAYMENT: '+safe(payStatus.toUpperCase())+'</span></div><div class="order-items">'+lines+'</div><div class="order-total"><span>Order total</span><strong>₹'+safe(total)+'</strong></div><div class="order-customer"><b>CUSTOMER</b><br>'+safe(order.customerName||order.name||"Customer")+'<br>'+safe(order.customerPhone||order.phone||"Phone not available")+'<br>'+safe(order.address||"Pickup order")+'</div><p class="small">'+safe(date)+'</p>'+actions+'</div></article>';
 }).join("");
@@ -618,6 +662,22 @@ currentOrderFilter=button.dataset.orderFilter;
 renderOrders();
 });
 
+// MARK ORDER READY AFTER TIMER AND KITCHEN CHECK
+$("ordersList").addEventListener("click",async event=>{
+const button=event.target.closest("[data-mark-ready]");
+if(!button||!currentRestaurantId)return;
+const id=button.dataset.markReady,order=partnerOrders.find(item=>item.id===id);
+if(!order)return;
+const type=String(order.orderType||order.deliveryType||order.fulfillmentType||"Delivery").toLowerCase().includes("pickup")?"Pickup":"Delivery";
+if(!confirm("Food ready check kar liya? "+type+" handover ke liye ready mark karein?"))return;
+button.disabled=true;button.textContent="UPDATING...";
+try{
+const batch=writeBatch(db);
+batch.update(doc(db,"orders",id),{status:"Ready",readyAt:serverTimestamp(),handoverType:type,updatedAt:serverTimestamp()});
+if(order.trackingCode){const code=String(order.trackingCode).toUpperCase().replace(/[\s-]/g,"");batch.update(doc(db,"orderTracking",code),{status:"Ready"});}
+await batch.commit();setStatus("Order marked Ready for "+type+".");
+}catch(error){alert("READY UPDATE FAILED: "+error.message);button.disabled=false;button.textContent="MARK READY FOR "+type.toUpperCase();}
+});
 // ACCEPT / REJECT ORDER ACTIONS
 $("ordersList").addEventListener("click",async event=>{
 const reject=event.target.closest("[data-reject-order]");
@@ -626,7 +686,7 @@ const button=event.target.closest("button[data-order]");if(!button||!currentRest
 const orderId=button.dataset.order,status=button.dataset.status,order=partnerOrders.find(item=>item.id===orderId);if(!order)return;
 if(!confirm("Order status "+status+" karna hai?"))return;
 button.disabled=true;button.textContent="UPDATING...";
-try{const batch=writeBatch(db);const update={status,updatedAt:serverTimestamp()};if(status==="Accepted")update.acceptedAt=serverTimestamp();if(status==="Preparing")update.preparingAt=serverTimestamp();batch.update(doc(db,"orders",orderId),update);if(order.trackingCode){const code=String(order.trackingCode).toUpperCase().replace(/[\s-]/g,"");batch.update(doc(db,"orderTracking",code),{status});}await batch.commit();setStatus("Order status updated: "+status);button.textContent=status==="Accepted"?"✓ ACCEPTED":"✓ "+status.toUpperCase();button.classList.add("confirmed");}catch(error){alert("ORDER ERROR: "+(error.code||"")+" - "+error.message);setStatus("Order update failed: "+error.message);button.disabled=false;button.textContent=status==="Accepted"?"ACCEPT ORDER":"START PREPARING";}
+try{const batch=writeBatch(db);const update={status,updatedAt:serverTimestamp()};if(status==="Accepted"){const duration=estimatePrepMinutes(order);update.acceptedAt=serverTimestamp();update.status="Preparing";update.preparingAt=serverTimestamp();update.prepDurationMinutes=duration;update.estimatedReadyAt=new Date(Date.now()+duration*60000);}if(status==="Preparing"){update.preparingAt=serverTimestamp();}batch.update(doc(db,"orders",orderId),update);if(order.trackingCode){const code=String(order.trackingCode).toUpperCase().replace(/[\s-]/g,"");batch.update(doc(db,"orderTracking",code),{status});}await batch.commit();setStatus(status==="Accepted"?"Order accepted. Preparation timer started.":"Order status updated: "+status);button.textContent=status==="Accepted"?"✓ PREPARING":"✓ "+status.toUpperCase();button.classList.add("confirmed");}catch(error){alert("ORDER ERROR: "+(error.code||"")+" - "+error.message);setStatus("Order update failed: "+error.message);button.disabled=false;button.textContent=status==="Accepted"?"ACCEPT ORDER":"START PREPARING";}
 });
 $("cancelRejectBtn").addEventListener("click",()=>{pendingRejectOrderId=null;$("rejectDialog").classList.remove("open");});
 $("confirmRejectBtn").addEventListener("click",async()=>{
