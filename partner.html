@@ -10,45 +10,80 @@
 <title>ZaikaBox Restaurant Partner</title>
 
 <style>
-*{box-sizing:border-box}
-:root{--orange:#ff8a35;--panel:#1b1715;--line:#382a22;--muted:#c9b9ad}
-body{margin:0;padding:16px 16px 92px;background:radial-gradient(circle at 85% 0%,#342014 0,#100d0a 38%);color:#fffaf5;font-family:Arial,sans-serif;min-height:100vh}
-.wrap{max-width:850px;margin:auto}
-h1{color:var(--orange);margin:0 0 4px;letter-spacing:2px}
-h2{margin-top:0}
-.card{background:linear-gradient(145deg,#211b17,#171310);border:1px solid var(--line);border-radius:19px;padding:18px;margin:14px 0;box-shadow:0 10px 28px #0005}
-input,select,textarea{width:100%;padding:14px;margin:7px 0 13px;border:1px solid #594276;border-radius:12px;background:#160e25;color:#fff;font-size:15px}
-label{font-size:13px;color:#e0cbb9}
-button{padding:12px 16px;margin:4px;border:0;border-radius:12px;font-weight:bold;cursor:pointer;transition:transform .16s ease,filter .16s ease,box-shadow .16s ease;box-shadow:0 4px 12px #0003; -webkit-tap-highlight-color:transparent}
-button:active{transform:scale(.94);filter:brightness(1.2);box-shadow:0 1px 4px #0005}
-button:focus-visible{outline:2px solid #fff;outline-offset:3px}
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap');
+:root{--bg:#100d0a;--surface:#1c1814;--surface2:#262019;--surface3:#33291f;--orange:#ff8a35;--orange2:#ffb16f;--text:#fffaf5;--muted:#b4a69a;--line:rgba(255,255,255,.09);--green:#37d69a;--red:#ff5f72}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{min-height:100vh;padding:0 0 calc(94px + env(safe-area-inset-bottom));overflow-x:hidden;background:radial-gradient(circle at 85% 0%,rgba(255,138,53,.12),transparent 30%),var(--bg);color:var(--text);font-family:'DM Sans',Arial,sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0;color:inherit;-webkit-tap-highlight-color:transparent;transition:transform .18s cubic-bezier(.2,.8,.2,1),filter .18s,box-shadow .18s,border-color .18s}
+button:active{transform:scale(.95);filter:brightness(1.15)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--orange2);outline-offset:3px}
 button:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.primary{background:linear-gradient(135deg,#ffad58,#ff7626);color:#211006}
-.secondary{background:linear-gradient(135deg,#563d70,#342347);color:#fff}
-.danger{background:linear-gradient(135deg,#f17686,#d94d65);color:#fff}
-.success{background:linear-gradient(135deg,#59d49a,#29996a);color:#10251b}
+.wrap{width:100%;max-width:620px;min-height:100vh;margin:auto;padding:0 16px}
+h1,h2,h3{font-family:'Outfit',sans-serif;letter-spacing:-.35px}
+h1{font-size:24px;color:var(--orange2);margin:0}
+h2{font-size:21px;margin:0 0 12px}
+h3{font-size:16px}
+p{line-height:1.55}
 .hidden{display:none!important}
-.small{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
-#globalStatus{background:#302044;color:#ffd27a;padding:13px;border-radius:12px;margin:14px 0;overflow-wrap:anywhere;line-height:1.5}
+.small{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.eyebrow{font-size:10px;letter-spacing:1.7px;color:var(--orange2);font-weight:800;text-transform:uppercase;margin-bottom:5px}
+.card{background:linear-gradient(145deg,#211b17,#171310);border:1px solid var(--line);border-radius:22px;padding:18px;margin:14px 0;box-shadow:0 14px 34px rgba(0,0,0,.2)}
+#loginBox{margin-top:28px;padding:22px;background:radial-gradient(circle at 90% 0%,rgba(255,138,53,.16),transparent 38%),linear-gradient(145deg,#211b17,#171310)}
+#loginBox h2{font-size:25px;margin-bottom:8px}
+#loginBox:before{content:'🍱';display:grid;place-items:center;width:62px;height:62px;margin-bottom:16px;border-radius:20px;background:linear-gradient(135deg,#ff9b4a,#d95716);font-size:31px;box-shadow:0 8px 24px rgba(255,138,53,.2)}
+label{display:block;font-size:12px;color:#e7d5c7;font-weight:700;margin:10px 0 4px}
+input,select,textarea{display:block;width:100%;min-height:48px;padding:13px 14px;margin:6px 0 13px;border:1px solid rgba(255,255,255,.12);border-radius:13px;background:#120e0b;color:#fff;font-size:16px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,138,53,.12)}
+input::placeholder,textarea::placeholder{color:#938477}
+button{padding:12px 16px;margin:4px;border-radius:13px;font-size:12px;font-weight:800;letter-spacing:.25px;box-shadow:0 5px 16px rgba(0,0,0,.2)}
+.primary{background:linear-gradient(135deg,#ff9b4a,#ed681f);color:#fff;box-shadow:0 7px 20px rgba(255,138,53,.22)}
+.secondary{background:linear-gradient(135deg,#342a22,#241d18);color:#f5d7c0;border:1px solid rgba(255,138,53,.16)}
+.danger{background:linear-gradient(135deg,#e96c79,#c83f59);color:#fff}
+.success{background:linear-gradient(135deg,#47d69a,#209a6a);color:#08271b}
+#loginBtn{width:100%;min-height:50px;margin:10px 0 0;font-size:14px}
+#globalStatus{background:rgba(255,138,53,.09);border:1px solid rgba(255,138,53,.18);color:#ffd0a8;padding:12px 14px;border-radius:14px;margin:13px 0;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
 #menuMessage{color:#ffd27a;overflow-wrap:anywhere}
-.item,.order{background:#211b18;border:1px solid #49372b;border-radius:15px;padding:15px;margin:12px 0;overflow-wrap:anywhere}
-.item h3,.order h3{color:#ffb16f;margin:0 0 8px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 2px 13px;position:sticky;top:0;z-index:15;background:rgba(16,13,10,.94);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+.brand-lockup{display:flex;align-items:center;gap:11px;min-width:0}
+.brand-mark{width:46px;height:46px;flex-shrink:0;display:grid;place-items:center;border-radius:15px;background:linear-gradient(135deg,#ff9b4a,#d95716);box-shadow:0 7px 22px rgba(255,138,53,.22);font-size:24px}
+#restaurantName{font-size:20px;max-width:230px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .secondary{margin:0;padding:10px 12px}
+.page{padding:4px 0 16px;animation:screenIn .3s ease both}
+@keyframes screenIn{from{opacity:0;transform:translateY(11px)}to{opacity:1;transform:translateY(0)}}
+.hero{position:relative;overflow:hidden;border-radius:25px;padding:23px 20px;min-height:170px;background:radial-gradient(circle at 88% 22%,rgba(255,255,255,.12),transparent 24%),linear-gradient(135deg,#542d1c,#25150e 72%);border:1px solid rgba(255,138,53,.2);box-shadow:0 16px 38px rgba(0,0,0,.22);margin:14px 0}
+.hero:after{content:'🍲';position:absolute;right:8px;bottom:8px;font-size:76px;transform:rotate(-10deg);filter:drop-shadow(0 12px 12px rgba(0,0,0,.25));animation:floatFood 3s ease-in-out infinite;pointer-events:none}
+@keyframes floatFood{0%,100%{transform:translateY(0) rotate(-10deg)}50%{transform:translateY(-8px) rotate(-5deg)}}
+.hero h2{font-size:25px;max-width:70%;margin:0 0 7px}
+.hero p{font-size:12px;color:#e7d5c7;max-width:68%}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
+.stat{padding:16px;border-radius:18px;background:linear-gradient(145deg,#302116,#1d1713);border:1px solid rgba(255,138,53,.2);min-width:0}
+.stat strong{display:block;color:var(--orange2);font-family:'Outfit',sans-serif;font-size:22px;margin-bottom:5px}
+.stat span{font-size:11px;color:var(--muted)}
+.shortcut{width:100%;margin:6px 0;text-align:left;min-height:49px;display:flex;align-items:center;gap:10px;padding:13px 15px;font-size:13px}
 .row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.tag{display:inline-block;background:#3a2854;padding:5px 9px;border-radius:20px;font-size:12px}
-hr{border:0;border-top:1px solid #49365f;margin:16px 0}
-.order-buttons{display:flex;flex-wrap:wrap;gap:5px}
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 2px}
-.eyebrow{font-size:11px;letter-spacing:2px;color:#c7a58b}
-.page{animation:pageIn .24s ease both}
-@keyframes pageIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
-.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.stat{padding:16px;border-radius:15px;background:linear-gradient(145deg,#302116,#1d1713);border:1px solid #604027}
-.stat strong{display:block;color:#ffae69;font-size:22px;margin-bottom:5px}
-.navbar{position:fixed;z-index:20;bottom:0;left:0;right:0;display:flex;justify-content:center;gap:7px;padding:10px max(10px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom));background:#100d0aee;backdrop-filter:blur(16px);border-top:1px solid #493323}
-.navbtn{flex:1;max-width:170px;margin:0;padding:10px 5px;background:#211a17;color:#bda99a;border:1px solid #392a20;font-size:12px}
-.navbtn.active{background:linear-gradient(135deg,#ffad58,#ff7626);color:#211006;border-color:transparent}
-.shortcut{width:100%;margin:5px 0;text-align:left}
-
+.item,.order{background:linear-gradient(145deg,#241e19,#191511);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:16px;margin:12px 0;overflow-wrap:anywhere;animation:cardIn .28s ease both}
+@keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.item h3,.order h3{color:var(--orange2);margin:0 0 9px}
+.item p,.order p{font-size:12px;margin:6px 0;color:#e9ddd4}
+.item .small,.order .small{color:var(--muted)}
+.tag{display:inline-flex;align-items:center;gap:5px;background:rgba(255,138,53,.13);border:1px solid rgba(255,138,53,.2);color:#ffc18e;padding:5px 9px;border-radius:20px;font-size:10px;font-weight:800}
+.order-buttons{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.order-buttons button{flex:1;min-width:92px}
+hr{border:0;border-top:1px solid var(--line);margin:17px 0}
+#menuForm{margin-top:12px}
+#saveItemBtn{width:100%;min-height:48px}
+#menuList{margin-top:10px}
+.navbar{position:fixed;z-index:30;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:620px;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:9px 8px calc(9px + env(safe-area-inset-bottom));background:rgba(24,19,15,.97);border-top:1px solid var(--line);backdrop-filter:blur(20px)}
+.navbtn{margin:0;min-height:52px;padding:7px 3px;background:transparent;color:#a29488;border:1px solid transparent;box-shadow:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:19px;line-height:1.1}
+.navbtn small{font-size:9px;font-weight:800}
+.navbtn.active{color:#ffad70;background:rgba(255,138,53,.1);border-color:rgba(255,138,53,.17);box-shadow:0 0 18px rgba(255,138,53,.08)}
+.navbtn.active{transform:translateY(-2px)}
+#profileRestaurantName{font-size:22px;color:var(--orange2);margin:12px 0}
+#profileLogoutBtn{width:100%;margin-top:20px}
+@media(max-width:360px){.wrap{padding:0 12px}.hero{padding:19px 16px}.hero:after{font-size:64px}.hero h2{font-size:22px}.card{padding:15px}.navbtn{font-size:17px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
 
@@ -76,24 +111,25 @@ hr{border:0;border-top:1px solid #49365f;margin:16px 0}
 <div id="dashboard" class="hidden">
 
 <div class="topbar">
-<div><div class="eyebrow">ZAIKABOX • PARTNER</div><h1 id="restaurantName">Restaurant</h1></div>
+<div class="brand-lockup"><div class="brand-mark">🍱</div><div><div class="eyebrow">ZAIKABOX • RESTAURANT PARTNER</div><h1 id="restaurantName">Restaurant</h1></div></div>
 <button class="secondary" id="logoutBtn" type="button">LOGOUT</button>
 </div>
 
 <section class="page" id="page-home">
-<div class="card">
+<div class="hero">
+<div class="eyebrow">YOUR RESTAURANT SPACE</div>
 <h2>Welcome back 👋</h2>
-<p class="small" id="partnerMessage">Your restaurant workspace</p>
-<div class="stats">
-<div class="stat"><strong>LIVE</strong><span class="small">Order connection</span></div>
-<div class="stat"><strong>MENU</strong><span class="small">Manage food items</span></div>
+<p id="partnerMessage">Your restaurant workspace is ready. Manage orders and menu from here.</p>
 </div>
+<div class="stats">
+<div class="stat"><strong>LIVE</strong><span>Order connection</span></div>
+<div class="stat"><strong>MENU</strong><span>Manage food items</span></div>
 </div>
 <div class="card">
 <h2>Quick actions</h2>
-<button class="primary shortcut" type="button" data-goto="orders">🧾 &nbsp; Open Orders</button>
-<button class="secondary shortcut" type="button" data-goto="menu">🍽️ &nbsp; Manage Menu</button>
-<button class="secondary shortcut" type="button" data-goto="profile">🏪 &nbsp; Restaurant Profile</button>
+<button class="primary shortcut" type="button" data-goto="orders">🧾 <span>Open Orders</span> <span style="margin-left:auto">›</span></button>
+<button class="secondary shortcut" type="button" data-goto="menu">🍽️ <span>Manage Menu</span> <span style="margin-left:auto">›</span></button>
+<button class="secondary shortcut" type="button" data-goto="profile">🏪 <span>Restaurant Profile</span> <span style="margin-left:auto">›</span></button>
 </div>
 </section>
 
@@ -162,10 +198,10 @@ hr{border:0;border-top:1px solid #49365f;margin:16px 0}
 </section>
 
 <nav class="navbar" aria-label="Partner navigation">
-<button class="navbtn active" type="button" data-page="home">⌂<br>Home</button>
-<button class="navbtn" type="button" data-page="orders">▣<br>Orders</button>
-<button class="navbtn" type="button" data-page="menu">☷<br>Menu</button>
-<button class="navbtn" type="button" data-page="profile">♙<br>Profile</button>
+<button class="navbtn active" type="button" data-page="home">⌂<small>Home</small></button>
+<button class="navbtn" type="button" data-page="orders">▣<small>Orders</small></button>
+<button class="navbtn" type="button" data-page="menu">☷<small>Menu</small></button>
+<button class="navbtn" type="button" data-page="profile">♙<small>Profile</small></button>
 </nav>
 
 </div>
