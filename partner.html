@@ -125,7 +125,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 
 .registration-link{background:transparent;border:1px solid #64401f;color:#ffb24a;width:100%;margin-top:10px}
 
-</style>
+\n#errorLogoutBtn{display:block;width:auto;min-height:30px;margin:8px auto 0;padding:6px 12px;font-size:10px;letter-spacing:.5px;border-radius:9px;box-shadow:none}\n</style>
 </head>
 
 <body>
@@ -702,7 +702,7 @@ stopLiveOrders();
 $("dashboard").classList.add("hidden");
 $("loginBox").classList.remove("hidden");
 $("errorLogoutBtn").classList.remove("hidden");
-setStatus("PARTNER ERROR: "+(error.code||"unknown")+" - "+error.message);
+if(String(error.message||"").includes("accounts document nahi mila")){setStatus("PARTNER ACCOUNT NOT READY: Is UID ke liye accounts/{UID} record nahi mila. Super Admin ko approval ke baad account record create/link karna hoga. Logout karke baad mein try karein.");}else{setStatus("PARTNER ERROR: "+(error.code||"unknown")+" - "+error.message);}
 }
 },error=>{
 console.error("AUTH STATE ERROR:",error);
