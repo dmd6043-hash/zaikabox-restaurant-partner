@@ -1,14 +1,14 @@
 {
-  "id": "./restaurant-partner",
+  "id": "./partner.html",
   "name": "ZaikaBox Restaurant Partner",
-  "short_name": "Zaika Partner",
+  "short_name": "Zaika Restaurant",
   "description": "ZaikaBox Restaurant Partner App",
   "start_url": "./partner.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#100d0a",
-  "theme_color": "#100d0a",
+  "theme_color": "#ff8a35",
   "icons": [
     {
       "src": "./icon-192.png",
