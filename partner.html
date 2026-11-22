@@ -525,8 +525,9 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
     const credential=await createUserWithEmailAndPassword(auth,email,password);
     const uid=credential.user.uid;
     const documents={};
-    for(const [kind,file] of Object.entries(selectedDocs)){
-      if(!file)continue;
+    const filesToUpload=Object.entries(selectedDocs).filter(([,file])=>!!file);
+    $("registrationMessage").textContent="Documents ek saath upload ho rahe hain...";
+    await Promise.all(filesToUpload.map(async([kind,file])=>{
       const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_").slice(-90);
       const path="restaurantApplications/"+uid+"/"+kind+"/"+Date.now()+"_"+safeName;
       await uploadBytes(storageRef(storage,path),file,{
@@ -534,7 +535,7 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
         customMetadata:{applicantUid:uid,documentType:kind}
       });
       documents[kind]=path;
-    }
+    }));
     const application={
       applicantUid:uid,
       ownerName,phone,email,restaurantName,address,city,businessType,foodType,
