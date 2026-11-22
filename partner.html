@@ -672,10 +672,7 @@ const type=String(order.orderType||order.deliveryType||order.fulfillmentType||"D
 if(!confirm("Food ready check kar liya? "+type+" handover ke liye ready mark karein?"))return;
 button.disabled=true;button.textContent="UPDATING...";
 try{
-const batch=writeBatch(db);
-batch.update(doc(db,"orders",id),{status:"Ready",readyAt:serverTimestamp(),handoverType:type,updatedAt:serverTimestamp()});
-if(order.trackingCode){const code=String(order.trackingCode).toUpperCase().replace(/[\s-]/g,"");batch.update(doc(db,"orderTracking",code),{status:"Ready"});}
-await batch.commit();setStatus("Order marked Ready for "+type+".");
+await updateDoc(doc(db,"orders",id),{status:"Ready",readyAt:serverTimestamp(),handoverType:type,updatedAt:serverTimestamp()});setStatus("Order marked Ready for "+type+".");
 }catch(error){alert("READY UPDATE FAILED: "+error.message);button.disabled=false;button.textContent="MARK READY FOR "+type.toUpperCase();}
 });
 // ACCEPT / REJECT ORDER ACTIONS
@@ -686,13 +683,13 @@ const button=event.target.closest("button[data-order]");if(!button||!currentRest
 const orderId=button.dataset.order,status=button.dataset.status,order=partnerOrders.find(item=>item.id===orderId);if(!order)return;
 if(!confirm("Order status "+status+" karna hai?"))return;
 button.disabled=true;button.textContent="UPDATING...";
-try{const batch=writeBatch(db);const update={status,updatedAt:serverTimestamp()};if(status==="Accepted"){const duration=estimatePrepMinutes(order);update.acceptedAt=serverTimestamp();update.status="Preparing";update.preparingAt=serverTimestamp();update.prepDurationMinutes=duration;update.estimatedReadyAt=new Date(Date.now()+duration*60000);}if(status==="Preparing"){update.preparingAt=serverTimestamp();}batch.update(doc(db,"orders",orderId),update);if(order.trackingCode){const code=String(order.trackingCode).toUpperCase().replace(/[\s-]/g,"");batch.update(doc(db,"orderTracking",code),{status:update.status});}await batch.commit();setStatus(status==="Accepted"?"Order accepted. Preparation timer started.":"Order status updated: "+status);button.textContent=status==="Accepted"?"✓ PREPARING":"✓ "+status.toUpperCase();button.classList.add("confirmed");}catch(error){alert("ORDER ERROR: "+(error.code||"")+" - "+error.message);setStatus("Order update failed: "+error.message);button.disabled=false;button.textContent=status==="Accepted"?"ACCEPT ORDER":"START PREPARING";}
+try{const batch=writeBatch(db);const update={status,updatedAt:serverTimestamp()};if(status==="Accepted"){const duration=estimatePrepMinutes(order);update.acceptedAt=serverTimestamp();update.status="Preparing";update.preparingAt=serverTimestamp();update.prepDurationMinutes=duration;update.estimatedReadyAt=new Date(Date.now()+duration*60000);}if(status==="Preparing"){update.preparingAt=serverTimestamp();}batch.update(doc(db,"orders",orderId),update);await batch.commit();setStatus(status==="Accepted"?"Order accepted. Preparation timer started.":"Order status updated: "+status);button.textContent=status==="Accepted"?"✓ PREPARING":"✓ "+status.toUpperCase();button.classList.add("confirmed");}catch(error){alert("ORDER ERROR: "+(error.code||"")+" - "+error.message);setStatus("Order update failed: "+error.message);button.disabled=false;button.textContent=status==="Accepted"?"ACCEPT ORDER":"START PREPARING";}
 });
 $("cancelRejectBtn").addEventListener("click",()=>{pendingRejectOrderId=null;$("rejectDialog").classList.remove("open");});
 $("confirmRejectBtn").addEventListener("click",async()=>{
 if(!pendingRejectOrderId||!currentRestaurantId)return;const reason=$("rejectReason").value,note=$("rejectNote").value.trim();if(!reason){alert("Please rejection reason select karein.");return;}if(reason==="Other"&&!note){alert("Other reason ke liye short note likhein.");return;}
 const id=pendingRejectOrderId,button=$("confirmRejectBtn");button.disabled=true;button.textContent="UPDATING...";
-try{const rejectionReason=reason==="Other"?note:reason+(note?" — "+note:"");const batch=writeBatch(db);batch.update(doc(db,"orders",id),{status:"Rejected",rejectionReason,rejectedAt:serverTimestamp(),updatedAt:serverTimestamp()});const order=partnerOrders.find(item=>item.id===id);if(order?.trackingCode){const code=String(order.trackingCode).toUpperCase().replace(/[\s-]/g,"");batch.update(doc(db,"orderTracking",code),{status:"Rejected"});}await batch.commit();$("rejectDialog").classList.remove("open");pendingRejectOrderId=null;setStatus("Order rejected. Reason saved: "+reason);}catch(error){alert("REJECTION FAILED: "+(error.code||"")+" - "+error.message);setStatus("Rejection failed: "+error.message);}finally{button.disabled=false;button.textContent="CONFIRM REJECTION";}
+try{const rejectionReason=reason==="Other"?note:reason+(note?" — "+note:"");await updateDoc(doc(db,"orders",id),{status:"Rejected",rejectionReason,rejectedAt:serverTimestamp(),updatedAt:serverTimestamp()});$("rejectDialog").classList.remove("open");pendingRejectOrderId=null;setStatus("Order rejected. Reason saved: "+reason);}catch(error){alert("REJECTION FAILED: "+(error.code||"")+" - "+error.message);setStatus("Rejection failed: "+error.message);}finally{button.disabled=false;button.textContent="CONFIRM REJECTION";}
 });
 
 // REFRESH ORDERS
