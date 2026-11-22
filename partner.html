@@ -506,8 +506,8 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
       return;
     }
   }
-  const phoneDigits=phone.replace(/[\\s-]/g,"");
-  if(!/^(?:(?:\\+?91)|0)?[6-9]\\d{9}$/.test(phoneDigits)){
+  const phoneDigits=phone.replace(/[\s-]/g,"");
+  if(!/^(?:(?:\+?91)|0)?[6-9]\d{9}$/.test(phoneDigits)){
     $("registrationMessage").textContent="Valid 10-digit Indian mobile number bhariye. +91 ya 0 prefix bhi chalega.";
     return;
   }
