@@ -108,7 +108,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 .order-empty{padding:32px 16px;text-align:center;border:1px dashed #343b45;border-radius:16px;color:#aeb4be;font-size:13px;line-height:1.7}
 .order-empty strong{display:block;color:#f5f5f5;font-size:16px;margin-bottom:5px}
 @media(max-width:370px){.order-tabs{gap:4px}.order-tab{font-size:10px;padding:10px 2px}.order-actions{flex-direction:column}}
-</style>
+.order-actions button:disabled{opacity:1;filter:saturate(1.1);cursor:default}.order-card.status-accepted{border-color:#267c5a}.order-card.status-preparing{border-color:#a76524}.order-card.status-rejected{border-color:#8e3444}.order-status-pill.accepted{background:#0c2c20;color:#69e8b4;border-color:#267c5a}.order-status-pill.preparing{background:#30200f;color:#ffc17b;border-color:#a76524}.order-status-pill.rejected{background:#32121b;color:#ff8a9a;border-color:#8e3444}.reject-panel{display:none;margin-top:12px;padding:14px;border:1px solid #70402a;border-radius:15px;background:#100d0b}.reject-panel.open{display:block;animation:cardIn .2s ease}.reject-actions{display:flex;gap:8px}.reject-actions button{flex:1}.stock-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0}.stock-tab{margin:0;padding:12px;background:#0b0d11;color:#aeb4be;border:1px solid #303640;box-shadow:none}.stock-tab.active{background:linear-gradient(135deg,#ffad24,#ff7800);color:#170b00;border-color:#ff9b18}.stock-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px;margin:9px 0;border:1px solid #2b313a;border-radius:15px;background:#0b0d11}.stock-row h3{font-size:14px}.stock-row p{font-size:11px;color:#aeb4be;margin-top:4px}.stock-row button{margin:0;white-space:nowrap}.stock-empty{padding:22px;text-align:center;border:1px dashed #343b45;border-radius:15px;color:#aeb4be;font-size:12px}</style>
 </head>
 
 <body>
@@ -194,8 +194,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 
 <p id="menuMessage" class="small"></p>
 <hr>
-<h3>Your Menu Items</h3>
-<div id="menuList">Menu not loaded yet.</div>
+<hr><div class="eyebrow">INVENTORY CONTROL</div><h3>Stock Management</h3><p class="small">Khatam item ko Out of Stock karein. Restock hone par Available karein.</p><div class="stock-tabs"><button type="button" class="stock-tab active" data-stock-filter="available">Available Items</button><button type="button" class="stock-tab" data-stock-filter="out">Out of Stock</button></div><div id="stockList"></div><hr><h3>All Menu Items</h3><div id="menuList">Menu not loaded yet.</div>
 </div>
 </section>
 
@@ -212,7 +211,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 <button class="order-tab" type="button" data-order-filter="Preparing">Preparing</button>
 <button class="order-tab" type="button" data-order-filter="All">All Orders</button>
 </div>
-<div id="ordersList">Orders loading...</div>
+<div id="ordersList">Orders loading...</div><div id="rejectDialog" class="reject-panel" role="dialog" aria-label="Reject order reason"><h3>Reject Order</h3><p class="small">Customer ko genuine reason select karke batayein.</p><label for="rejectReason">Reason</label><select id="rejectReason"><option value="">Select reason</option><option>Item out of stock</option><option>Restaurant is currently full / high order volume</option><option>Restaurant is near closing time</option><option>Temporary kitchen/equipment issue</option><option>Delivery/pickup service unavailable</option><option>Other</option></select><label for="rejectNote">Extra note (optional)</label><textarea id="rejectNote" rows="2" maxlength="180" placeholder="Short explanation"></textarea><div class="reject-actions"><button type="button" class="secondary" id="cancelRejectBtn">CANCEL</button><button type="button" class="danger" id="confirmRejectBtn">CONFIRM REJECTION</button></div></div>
 </div>
 </section>
 
@@ -276,6 +275,8 @@ let loginInProgress=false;
 let partnerMenuItems=[];
 let partnerOrders=[];
 let currentOrderFilter="New";
+let pendingRejectOrderId=null;
+let currentStockFilter="available";
 let ordersUnsubscribe=null;
 
 function setStatus(message){
@@ -461,33 +462,20 @@ try{
 const snapshot=await getDocs(menuCollection());
 partnerMenuItems=snapshot.docs.map(item=>({id:item.id,...item.data()}));
 partnerMenuItems.sort((a,b)=>String(a.name||"").localeCompare(String(b.name||"")));
+if(!partnerMenuItems.length){$("menuList").innerHTML='<p class="small">Abhi menu item nahi hai.</p>';$("stockList").innerHTML='<div class="stock-empty">No menu items yet.</div>';return;}
+$("menuList").innerHTML=partnerMenuItems.map(item=>{const available=item.available??true;return '<div class="item"><div class="row"><h3>'+safe(item.name||"Food Item")+'</h3><span class="tag">'+(available?"AVAILABLE":"OUT OF STOCK")+'</span></div><p>Price: <b>₹'+safe(item.price??0)+'</b></p><p class="small">Category: '+safe(item.category||"Other")+'</p><p class="small">'+safe(item.description||"")+'</p><button class="primary" data-action="edit" data-id="'+safe(item.id)+'">EDIT</button><button class="'+(available?"danger":"success")+'" data-action="toggle" data-id="'+safe(item.id)+'">'+(available?"MARK OUT OF STOCK":"MARK AVAILABLE")+'</button><button class="danger" data-action="delete" data-id="'+safe(item.id)+'">DELETE</button></div>';}).join("");
+renderStockItems();
+}catch(error){console.error("MENU ERROR:",error);$("menuList").textContent="MENU ERROR: "+(error.code||"")+" "+error.message;$("stockList").textContent="Stock load failed.";}
+}
+function renderStockItems(){
+document.querySelectorAll("[data-stock-filter]").forEach(button=>button.classList.toggle("active",button.dataset.stockFilter===currentStockFilter));
+const list=partnerMenuItems.filter(item=>(item.available??true)===(currentStockFilter==="available"));
+if(!list.length){$("stockList").innerHTML='<div class="stock-empty">'+(currentStockFilter==="available"?"No available items.":"No out-of-stock items. All good!")+'</div>';return;}
+$("stockList").innerHTML=list.map(item=>{const available=item.available??true;return '<div class="stock-row"><div><h3>'+safe(item.name||"Food Item")+'</h3><p>₹'+safe(item.price??0)+' · '+safe(item.category||"Other")+'</p></div><button class="'+(available?"danger":"success")+'" data-stock-toggle="'+safe(item.id)+'">'+(available?"OUT OF STOCK":"RESTOCK")+'</button></div>';}).join("");
+}
+$("stockList").addEventListener("click",async event=>{const button=event.target.closest("[data-stock-toggle]");if(!button||!currentRestaurantId)return;const item=partnerMenuItems.find(x=>x.id===button.dataset.stockToggle);if(!item)return;button.disabled=true;try{await updateDoc(doc(db,"restaurants",currentRestaurantId,"menuItems",item.id),{available:!(item.available??true),updatedAt:serverTimestamp()});await loadMenu();}catch(error){alert("Stock update failed: "+error.message);button.disabled=false;}});
+document.querySelectorAll("[data-stock-filter]").forEach(button=>button.addEventListener("click",()=>{currentStockFilter=button.dataset.stockFilter;renderStockItems();}));
 
-if(!partnerMenuItems.length){
-$("menuList").innerHTML='<p class="small">Abhi menu item nahi hai. Upar se add karein.</p>';
-return;
-}
-
-$("menuList").innerHTML=partnerMenuItems.map(item=>{
-const available=item.available??true;
-return `
-<div class="item">
-<div class="row">
-<h3>${safe(item.emoji||"")} ${safe(item.name||"Food Item")}</h3>
-<span class="tag">${available?"AVAILABLE":"UNAVAILABLE"}</span>
-</div>
-<p>Price: <b>₹${safe(item.price??0)}</b></p>
-<p class="small">Category: ${safe(item.category||"Other")}</p>
-<p class="small">${safe(item.description||"")}</p>
-<button class="primary" data-action="edit" data-id="${safe(item.id)}">EDIT</button>
-<button class="secondary" data-action="toggle" data-id="${safe(item.id)}">${available?"MARK UNAVAILABLE":"MAKE AVAILABLE"}</button>
-<button class="danger" data-action="delete" data-id="${safe(item.id)}">DELETE</button>
-</div>`;
-}).join("");
-}catch(error){
-console.error("MENU ERROR:",error);
-$("menuList").textContent="MENU ERROR: "+(error.code||"")+" "+error.message;
-}
-}
 
 // RESET MENU FORM
 function resetMenuForm(){
@@ -609,36 +597,18 @@ $("navNewOrderCount").classList.toggle("hidden",count===0);
 
 function renderOrders(){
 const countStatus=status=>partnerOrders.filter(order=>String(order.status||"New").toLowerCase()===status.toLowerCase()).length;
-$("ordersWaitingCount").textContent=String(countStatus("New"));
-$("tabNewCount").textContent=String(countStatus("New"));
+$("ordersWaitingCount").textContent=String(countStatus("New"));$("tabNewCount").textContent=String(countStatus("New"));
 document.querySelectorAll("[data-order-filter]").forEach(button=>button.classList.toggle("active",button.dataset.orderFilter===currentOrderFilter));
 const visible=partnerOrders.filter(order=>currentOrderFilter==="All"||String(order.status||"New").toLowerCase()===currentOrderFilter.toLowerCase());
-if(!visible.length){
-const message=currentOrderFilter==="New"?"No new orders right now. New customer orders will appear here automatically.":"No "+currentOrderFilter.toLowerCase()+" orders to show.";
-$("ordersList").innerHTML='<div class="order-empty"><strong>'+safe(message)+'</strong>Keep this screen open to receive live orders.</div>';
-return;
-}
+if(!visible.length){const message=currentOrderFilter==="New"?"No new orders right now. New orders appear here automatically.":"No "+currentOrderFilter.toLowerCase()+" orders to show.";$("ordersList").innerHTML='<div class="order-empty"><strong>'+safe(message)+'</strong>Keep this screen open for live orders.</div>';return;}
 $("ordersList").innerHTML=visible.map(order=>{
-const lines=Array.isArray(order.items)?order.items.map(item=>{
-const qty=Number(item.quantity||item.qty||1);
-return '<div class="order-item-line"><span>'+safe(item.name||"Food item")+' × '+safe(qty)+'</span><span>₹'+safe(item.price??item.subtotal??"—")+'</span></div>';
-}).join(""):'<div class="order-item-line">'+safe(order.items||"Items unavailable")+'</div>';
-const date=order.createdAt?.toDate?order.createdAt.toDate().toLocaleString("en-IN"):"Time unavailable";
-const status=order.status||"New";
-const isNew=String(status).toLowerCase()==="new";
-const payment=String(order.paymentMethod||"Not specified").toUpperCase();
-const payStatus=String(order.paymentStatus||"Pending");
-const orderType=String(order.orderType||order.deliveryType||order.fulfillmentType||(String(order.address||"").toLowerCase()==="pickup"?"Pickup":"Delivery"));
-const total=order.total??order.grandTotal??order.amount??0;
-let actions="";
-if(isNew){
-actions='<div class="order-actions"><button class="success" data-order="'+safe(order.id)+'" data-status="Accepted">ACCEPT ORDER</button><button class="danger" data-order="'+safe(order.id)+'" data-status="Rejected">REJECT</button></div>';
-}else if(String(status).toLowerCase()==="accepted"){
-actions='<div class="order-actions"><button class="primary" data-order="'+safe(order.id)+'" data-status="Preparing">START PREPARING</button></div>';
-}else if(String(status).toLowerCase()==="preparing"){
-actions='<div class="small">Order is being prepared.</div>';
-}
-return '<article class="order-card '+(isNew?'is-new':'')+'"><div class="order-head"><h3>ORDER #'+safe(order.id.slice(0,8).toUpperCase())+'</h3><span class="tag">'+safe(status.toUpperCase())+'</span></div><div class="order-body"><div class="order-meta"><span class="order-chip orange">'+safe(orderType.toUpperCase())+'</span><span class="order-chip">'+safe(payment)+'</span><span class="order-chip">PAYMENT: '+safe(payStatus.toUpperCase())+'</span></div><div class="order-items">'+lines+'</div><div class="order-total"><span>Order total</span><strong>₹'+safe(total)+'</strong></div><div class="order-customer"><b>CUSTOMER</b><br>'+safe(order.customerName||order.name||"Customer")+'<br>'+safe(order.customerPhone||order.phone||"Phone not available")+'<br>'+safe(order.address||"Pickup order")+'</div><p class="small">'+safe(date)+'</p>'+actions+'</div></article>';
+const lines=Array.isArray(order.items)?order.items.map(item=>'<div class="order-item-line"><span>'+safe(item.name||"Food item")+' × '+safe(item.quantity||item.qty||1)+'</span><span>₹'+safe(item.price??item.subtotal??"—")+'</span></div>').join(""):'<div class="order-item-line">'+safe(order.items||"Items unavailable")+'</div>';
+const date=order.createdAt?.toDate?order.createdAt.toDate().toLocaleString("en-IN"):"Time unavailable";const status=order.status||"New";const normalized=String(status).toLowerCase();const isNew=normalized==="new";const payment=String(order.paymentMethod||"Not specified").toUpperCase();const payStatus=String(order.paymentStatus||"Pending");const orderType=String(order.orderType||order.deliveryType||order.fulfillmentType||(String(order.address||"").toLowerCase()==="pickup"?"Pickup":"Delivery"));const total=order.total??order.grandTotal??order.amount??0;let actions="";
+if(isNew)actions='<div class="order-actions"><button class="success" data-order="'+safe(order.id)+'" data-status="Accepted">ACCEPT ORDER</button><button class="danger" data-reject-order="'+safe(order.id)+'">REJECT ORDER</button></div>';
+else if(normalized==="accepted")actions='<div class="order-actions"><button class="success" disabled>✓ ACCEPTED</button><button class="primary" data-order="'+safe(order.id)+'" data-status="Preparing">START PREPARING</button></div>';
+else if(normalized==="preparing")actions='<div class="order-actions"><button class="success" disabled>✓ PREPARING</button></div>';
+else if(normalized==="rejected")actions='<div class="small">Rejected reason: '+safe(order.rejectionReason||"Not recorded")+'</div>';
+return '<article class="order-card '+(isNew?"is-new":"")+' status-'+safe(normalized)+'"><div class="order-head"><h3>ORDER #'+safe(order.id.slice(0,8).toUpperCase())+'</h3><span class="tag order-status-pill '+safe(normalized)+'">'+safe(status.toUpperCase())+'</span></div><div class="order-body"><div class="order-meta"><span class="order-chip orange">'+safe(orderType.toUpperCase())+'</span><span class="order-chip">'+safe(payment)+'</span><span class="order-chip">PAYMENT: '+safe(payStatus.toUpperCase())+'</span></div><div class="order-items">'+lines+'</div><div class="order-total"><span>Order total</span><strong>₹'+safe(total)+'</strong></div><div class="order-customer"><b>CUSTOMER</b><br>'+safe(order.customerName||order.name||"Customer")+'<br>'+safe(order.customerPhone||order.phone||"Phone not available")+'<br>'+safe(order.address||"Pickup order")+'</div><p class="small">'+safe(date)+'</p>'+actions+'</div></article>';
 }).join("");
 }
 $("orderTabs").addEventListener("click",event=>{
@@ -648,38 +618,21 @@ currentOrderFilter=button.dataset.orderFilter;
 renderOrders();
 });
 
-// ORDER STATUS UPDATE — ONLY STATUS FIELD
+// ACCEPT / REJECT ORDER ACTIONS
 $("ordersList").addEventListener("click",async event=>{
-const button=event.target.closest("button[data-order]");
-if(!button||!currentRestaurantId)return;
-const orderId=button.dataset.order;
-const status=button.dataset.status;
-const order=partnerOrders.find(item=>item.id===orderId);
-if(!order)return;
+const reject=event.target.closest("[data-reject-order]");
+if(reject){pendingRejectOrderId=reject.dataset.rejectOrder;$("rejectReason").value="";$("rejectNote").value="";$("rejectDialog").classList.add("open");$("rejectDialog").scrollIntoView({behavior:"smooth",block:"center"});return;}
+const button=event.target.closest("button[data-order]");if(!button||!currentRestaurantId)return;
+const orderId=button.dataset.order,status=button.dataset.status,order=partnerOrders.find(item=>item.id===orderId);if(!order)return;
 if(!confirm("Order status "+status+" karna hai?"))return;
-
-button.disabled=true;
-button.textContent="UPDATING...";
-
-try{
-const batch=writeBatch(db);
-batch.update(doc(db,"orders",orderId),{status});
-
-if(order.trackingCode){
-const trackingCode=String(order.trackingCode).toUpperCase().replace(/[\s-]/g,"");
-batch.update(doc(db,"orderTracking",trackingCode),{status});
-}
-await batch.commit();
-setStatus("Order status updated: "+status);
-alert("Order status successfully updated: "+status);
-}catch(error){
-console.error("ORDER UPDATE ERROR:",error);
-alert("ORDER ERROR: "+(error.code||"")+" - "+error.message);
-setStatus("Order update failed: "+error.message);
-}finally{
-button.disabled=false;
-button.textContent=status==="Accepted"?"ACCEPT":status==="Rejected"?"REJECT":"PREPARING";
-}
+button.disabled=true;button.textContent="UPDATING...";
+try{const batch=writeBatch(db);const update={status,updatedAt:serverTimestamp()};if(status==="Accepted")update.acceptedAt=serverTimestamp();if(status==="Preparing")update.preparingAt=serverTimestamp();batch.update(doc(db,"orders",orderId),update);if(order.trackingCode){const code=String(order.trackingCode).toUpperCase().replace(/[\s-]/g,"");batch.update(doc(db,"orderTracking",code),{status});}await batch.commit();setStatus("Order status updated: "+status);button.textContent=status==="Accepted"?"✓ ACCEPTED":"✓ "+status.toUpperCase();button.classList.add("confirmed");}catch(error){alert("ORDER ERROR: "+(error.code||"")+" - "+error.message);setStatus("Order update failed: "+error.message);button.disabled=false;button.textContent=status==="Accepted"?"ACCEPT ORDER":"START PREPARING";}
+});
+$("cancelRejectBtn").addEventListener("click",()=>{pendingRejectOrderId=null;$("rejectDialog").classList.remove("open");});
+$("confirmRejectBtn").addEventListener("click",async()=>{
+if(!pendingRejectOrderId||!currentRestaurantId)return;const reason=$("rejectReason").value,note=$("rejectNote").value.trim();if(!reason){alert("Please rejection reason select karein.");return;}if(reason==="Other"&&!note){alert("Other reason ke liye short note likhein.");return;}
+const id=pendingRejectOrderId,button=$("confirmRejectBtn");button.disabled=true;button.textContent="UPDATING...";
+try{const rejectionReason=reason==="Other"?note:reason+(note?" — "+note:"");const batch=writeBatch(db);batch.update(doc(db,"orders",id),{status:"Rejected",rejectionReason,rejectedAt:serverTimestamp(),updatedAt:serverTimestamp()});const order=partnerOrders.find(item=>item.id===id);if(order?.trackingCode){const code=String(order.trackingCode).toUpperCase().replace(/[\s-]/g,"");batch.update(doc(db,"orderTracking",code),{status:"Rejected"});}await batch.commit();$("rejectDialog").classList.remove("open");pendingRejectOrderId=null;setStatus("Order rejected. Reason saved: "+reason);}catch(error){alert("REJECTION FAILED: "+(error.code||"")+" - "+error.message);setStatus("Rejection failed: "+error.message);}finally{button.disabled=false;button.textContent="CONFIRM REJECTION";}
 });
 
 // REFRESH ORDERS
