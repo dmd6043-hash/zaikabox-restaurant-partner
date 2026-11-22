@@ -533,5 +533,15 @@ setStatus("Live orders reconnecting...");
 startLiveOrders();
 });
 </script>
+
+<!-- Restaurant Partner PWA Service Worker -->
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js", { scope: "./", updateViaCache: "none" })
+      .catch(error => console.error("ZaikaBox Restaurant Partner service worker failed:", error));
+  });
+}
+</script>
 </body>
 </html>
