@@ -168,6 +168,8 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
       <input id="regRestaurantName" required maxlength="100" placeholder="Restaurant / Cafe / Cloud Kitchen name">
       <label for="regAddress">Full restaurant address *</label>
       <textarea id="regAddress" required maxlength="500" rows="2" placeholder="House, street, area, landmark"></textarea>
+      <button class="secondary" id="useCurrentLocationBtn" type="button">📍 USE CURRENT LOCATION</button>
+      <p id="locationMessage" class="small" aria-live="polite">Tap to detect location and fill the restaurant address automatically. Location permission will be requested.</p>
       <label for="regCity">City *</label>
       <input id="regCity" required maxlength="80" placeholder="City">
       <label for="regBusinessType">Business type *</label>
@@ -434,6 +436,44 @@ $("successBackToLoginBtn").addEventListener("click",()=>{
   $("registrationSuccess").style.display="none";
   $("loginBox").classList.remove("hidden");
 });
+// USE CURRENT LOCATION TO AUTOFILL RESTAURANT ADDRESS
+$("useCurrentLocationBtn").addEventListener("click",()=>{
+  const button=$("useCurrentLocationBtn");
+  const message=$("locationMessage");
+  if(!navigator.geolocation){
+    message.textContent="Is browser mein location support nahi hai. Address manually bhariye.";
+    return;
+  }
+  button.disabled=true;
+  button.textContent="DETECTING LOCATION...";
+  message.textContent="GPS location li ja rahi hai. Browser permission allow karein...";
+  navigator.geolocation.getCurrentPosition(async position=>{
+    try{
+      const {latitude,longitude}=position.coords;
+      const response=await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+encodeURIComponent(latitude)+"&lon="+encodeURIComponent(longitude)+"&zoom=18&addressdetails=1",{headers:{"Accept":"application/json","Accept-Language":"en"}});
+      if(!response.ok)throw new Error("Address lookup unavailable");
+      const data=await response.json();
+      if(!data.display_name)throw new Error("Readable address not found");
+      $("regAddress").value=data.display_name.slice(0,500);
+      const parts=data.address||{};
+      const detectedCity=parts.city||parts.town||parts.village||parts.municipality||parts.county||"";
+      if(detectedCity && !$("regCity").value.trim())$("regCity").value=detectedCity;
+      message.textContent="✓ Current address filled. Please check and correct the address/landmark before submitting.";
+    }catch(error){
+      console.error("CURRENT ADDRESS LOOKUP ERROR:",error);
+      message.textContent="Address automatically nahi mil paya. Please restaurant address manually bhariye.";
+    }finally{
+      button.disabled=false;
+      button.textContent="📍 USE CURRENT LOCATION";
+    }
+  },error=>{
+    const reason=error.code===1?"Location permission denied. Browser settings mein location allow karein.":error.code===2?"Current location unavailable. GPS on karke dobara try karein.":"Location request timed out. Dobara try karein.";
+    message.textContent=reason;
+    button.disabled=false;
+    button.textContent="📍 USE CURRENT LOCATION";
+  },{enableHighAccuracy:true,timeout:20000,maximumAge:60000});
+});
+
 $("restaurantRegistrationForm").addEventListener("submit",async event=>{
   event.preventDefault();
   const ownerName=$("regOwnerName").value.trim();
