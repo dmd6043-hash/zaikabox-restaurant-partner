@@ -11,10 +11,10 @@
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap');
-:root{--bg:#100d0a;--surface:#1c1814;--surface2:#262019;--surface3:#33291f;--orange:#ff8a35;--orange2:#ffb16f;--text:#fffaf5;--muted:#b4a69a;--line:rgba(255,255,255,.09);--green:#37d69a;--red:#ff5f72}
+:root{--bg:#000;--surface:#090b0f;--surface2:#101318;--surface3:#171b21;--orange:#ff8a00;--orange2:#ffad42;--text:#f8f8fa;--muted:#a8adb6;--line:rgba(255,255,255,.10);--green:#37d69a;--red:#ff5f72}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{min-height:100vh;padding:0 0 calc(94px + env(safe-area-inset-bottom));overflow-x:hidden;background:radial-gradient(circle at 85% 0%,rgba(255,138,53,.12),transparent 30%),var(--bg);color:var(--text);font-family:'DM Sans',Arial,sans-serif}
+body{min-height:100vh;padding:0 0 calc(94px + env(safe-area-inset-bottom));overflow-x:hidden;background:#000;color:var(--text);font-family:'DM Sans',Arial,sans-serif}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer;border:0;color:inherit;-webkit-tap-highlight-color:transparent;transition:transform .18s cubic-bezier(.2,.8,.2,1),filter .18s,box-shadow .18s,border-color .18s}
 button:active{transform:scale(.95);filter:brightness(1.15)}
@@ -22,67 +22,64 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 button:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .wrap{width:100%;max-width:620px;min-height:100vh;margin:auto;padding:0 16px}
 h1,h2,h3{font-family:'Outfit',sans-serif;letter-spacing:-.35px}
-h1{font-size:24px;color:var(--orange2);margin:0}
+h1{font-size:24px;color:#fff;margin:0}
 h2{font-size:21px;margin:0 0 12px}
 h3{font-size:16px}
 p{line-height:1.55}
 .hidden{display:none!important}
 .small{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
 .eyebrow{font-size:10px;letter-spacing:1.7px;color:var(--orange2);font-weight:800;text-transform:uppercase;margin-bottom:5px}
-.card{background:linear-gradient(145deg,#211b17,#171310);border:1px solid var(--line);border-radius:22px;padding:18px;margin:14px 0;box-shadow:0 14px 34px rgba(0,0,0,.2)}
-#loginBox{margin-top:28px;padding:22px;background:radial-gradient(circle at 90% 0%,rgba(255,138,53,.16),transparent 38%),linear-gradient(145deg,#211b17,#171310)}
+.card{background:linear-gradient(145deg,#101318,#08090c);border:1px solid #252a31;border-radius:24px;padding:18px;margin:14px 0;box-shadow:0 14px 34px rgba(0,0,0,.42)}
+#loginBox{margin-top:28px;padding:22px;background:linear-gradient(145deg,#11151b,#050608);border-color:#44301d}
 #loginBox h2{font-size:25px;margin-bottom:8px}
-#loginBox:before{content:'🍱';display:grid;place-items:center;width:62px;height:62px;margin-bottom:16px;border-radius:20px;background:linear-gradient(135deg,#ff9b4a,#d95716);font-size:31px;box-shadow:0 8px 24px rgba(255,138,53,.2)}
-label{display:block;font-size:12px;color:#e7d5c7;font-weight:700;margin:10px 0 4px}
-input,select,textarea{display:block;width:100%;min-height:48px;padding:13px 14px;margin:6px 0 13px;border:1px solid rgba(255,255,255,.12);border-radius:13px;background:#120e0b;color:#fff;font-size:16px;outline:none}
-input:focus,select:focus,textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,138,53,.12)}
-input::placeholder,textarea::placeholder{color:#938477}
-button{padding:12px 16px;margin:4px;border-radius:13px;font-size:12px;font-weight:800;letter-spacing:.25px;box-shadow:0 5px 16px rgba(0,0,0,.2)}
-.primary{background:linear-gradient(135deg,#ff9b4a,#ed681f);color:#fff;box-shadow:0 7px 20px rgba(255,138,53,.22)}
-.secondary{background:linear-gradient(135deg,#342a22,#241d18);color:#f5d7c0;border:1px solid rgba(255,138,53,.16)}
+label{display:block;font-size:12px;color:#d6d8dd;font-weight:700;margin:10px 0 4px}
+input,select,textarea{display:block;width:100%;min-height:48px;padding:13px 14px;margin:6px 0 13px;border:1px solid #292e36;border-radius:14px;background:#080a0d;color:#fff;font-size:16px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,138,0,.12)}
+input::placeholder,textarea::placeholder{color:#777e88}
+button{padding:12px 16px;margin:4px;border-radius:13px;font-size:12px;font-weight:800;letter-spacing:.25px;box-shadow:0 5px 16px rgba(0,0,0,.35)}
+.primary{background:linear-gradient(135deg,#ffad24,#ff7800);color:#160b00;box-shadow:0 7px 20px rgba(255,138,0,.2)}
+.secondary{background:linear-gradient(145deg,#171b21,#090b0e);color:#f5f5f6;border:1px solid #343a43}
 .danger{background:linear-gradient(135deg,#e96c79,#c83f59);color:#fff}
 .success{background:linear-gradient(135deg,#47d69a,#209a6a);color:#08271b}
 #loginBtn{width:100%;min-height:50px;margin:10px 0 0;font-size:14px}
-#globalStatus{background:rgba(255,138,53,.09);border:1px solid rgba(255,138,53,.18);color:#ffd0a8;padding:12px 14px;border-radius:14px;margin:13px 0;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+#globalStatus{background:#090b0f;border:1px solid #3c2c1b;color:#ffc17b;padding:12px 14px;border-radius:14px;margin:13px 0;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
 #menuMessage{color:#ffd27a;overflow-wrap:anywhere}
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 2px 13px;position:sticky;top:0;z-index:15;background:rgba(16,13,10,.94);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 2px 13px;position:sticky;top:0;z-index:15;background:rgba(0,0,0,.96);backdrop-filter:blur(18px);border-bottom:1px solid #242424}
 .brand-lockup{display:flex;align-items:center;gap:11px;min-width:0}
-.brand-mark{width:46px;height:46px;flex-shrink:0;display:grid;place-items:center;border-radius:15px;background:linear-gradient(135deg,#ff9b4a,#d95716);box-shadow:0 7px 22px rgba(255,138,53,.22);font-size:24px}
+.brand-mark{display:none}
 #restaurantName{font-size:20px;max-width:230px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .topbar .secondary{margin:0;padding:10px 12px}
 .page{padding:4px 0 16px;animation:screenIn .3s ease both}
 @keyframes screenIn{from{opacity:0;transform:translateY(11px)}to{opacity:1;transform:translateY(0)}}
-.hero{position:relative;overflow:hidden;border-radius:25px;padding:23px 20px;min-height:170px;background:radial-gradient(circle at 88% 22%,rgba(255,255,255,.12),transparent 24%),linear-gradient(135deg,#542d1c,#25150e 72%);border:1px solid rgba(255,138,53,.2);box-shadow:0 16px 38px rgba(0,0,0,.22);margin:14px 0}
-.hero:after{content:'🍲';position:absolute;right:8px;bottom:8px;font-size:76px;transform:rotate(-10deg);filter:drop-shadow(0 12px 12px rgba(0,0,0,.25));animation:floatFood 3s ease-in-out infinite;pointer-events:none}
-@keyframes floatFood{0%,100%{transform:translateY(0) rotate(-10deg)}50%{transform:translateY(-8px) rotate(-5deg)}}
-.hero h2{font-size:25px;max-width:70%;margin:0 0 7px}
-.hero p{font-size:12px;color:#e7d5c7;max-width:68%}
+.hero{position:relative;overflow:hidden;border-radius:27px;padding:25px 21px;min-height:170px;background:linear-gradient(135deg,#111820,#080a0e 75%);border:1px solid #67431f;box-shadow:0 0 0 1px rgba(255,138,0,.06),0 16px 38px rgba(0,0,0,.5);margin:14px 0}
+.hero:after{content:none}
+.hero h2{font-size:25px;max-width:100%;margin:0 0 7px}
+.hero p{font-size:12px;color:#b9bec7;max-width:100%}
 .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
-.stat{padding:16px;border-radius:18px;background:linear-gradient(145deg,#302116,#1d1713);border:1px solid rgba(255,138,53,.2);min-width:0}
+.stat{padding:16px;border-radius:19px;background:linear-gradient(145deg,#11151b,#080a0d);border:1px solid #272d35;min-width:0}
 .stat strong{display:block;color:var(--orange2);font-family:'Outfit',sans-serif;font-size:22px;margin-bottom:5px}
 .stat span{font-size:11px;color:var(--muted)}
 .shortcut{width:100%;margin:6px 0;text-align:left;min-height:49px;display:flex;align-items:center;gap:10px;padding:13px 15px;font-size:13px}
 .row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.item,.order{background:linear-gradient(145deg,#241e19,#191511);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:16px;margin:12px 0;overflow-wrap:anywhere;animation:cardIn .28s ease both}
+.item,.order{background:linear-gradient(145deg,#11151a,#080a0d);border:1px solid #292f37;border-radius:19px;padding:16px;margin:12px 0;overflow-wrap:anywhere;animation:cardIn .28s ease both}
 @keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .item h3,.order h3{color:var(--orange2);margin:0 0 9px}
-.item p,.order p{font-size:12px;margin:6px 0;color:#e9ddd4}
+.item p,.order p{font-size:12px;margin:6px 0;color:#e9e9eb}
 .item .small,.order .small{color:var(--muted)}
-.tag{display:inline-flex;align-items:center;gap:5px;background:rgba(255,138,53,.13);border:1px solid rgba(255,138,53,.2);color:#ffc18e;padding:5px 9px;border-radius:20px;font-size:10px;font-weight:800}
+.tag{display:inline-flex;align-items:center;gap:5px;background:rgba(255,138,0,.10);border:1px solid rgba(255,138,0,.24);color:#ffc17b;padding:5px 9px;border-radius:20px;font-size:10px;font-weight:800}
 .order-buttons{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
 .order-buttons button{flex:1;min-width:92px}
-hr{border:0;border-top:1px solid var(--line);margin:17px 0}
+hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 #menuForm{margin-top:12px}
 #saveItemBtn{width:100%;min-height:48px}
 #menuList{margin-top:10px}
-.navbar{position:fixed;z-index:30;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:620px;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:9px 8px calc(9px + env(safe-area-inset-bottom));background:rgba(24,19,15,.97);border-top:1px solid var(--line);backdrop-filter:blur(20px)}
-.navbtn{margin:0;min-height:52px;padding:7px 3px;background:transparent;color:#a29488;border:1px solid transparent;box-shadow:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:19px;line-height:1.1}
-.navbtn small{font-size:9px;font-weight:800}
-.navbtn.active{color:#ffad70;background:rgba(255,138,53,.1);border-color:rgba(255,138,53,.17);box-shadow:0 0 18px rgba(255,138,53,.08)}
-.navbtn.active{transform:translateY(-2px)}
+.navbar{position:fixed;z-index:30;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:620px;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:9px 8px calc(9px + env(safe-area-inset-bottom));background:rgba(5,6,8,.98);border-top:1px solid #252a31;backdrop-filter:blur(20px)}
+.navbtn{margin:0;min-height:52px;padding:7px 3px;background:transparent;color:#9298a2;border:1px solid transparent;box-shadow:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12px;line-height:1.1}
+.navbtn small{font-size:10px;font-weight:800}
+.navbtn.active{color:#ffad42;background:rgba(255,138,0,.08);border-color:rgba(255,138,0,.2);box-shadow:0 0 18px rgba(255,138,0,.06);transform:translateY(-2px)}
 #profileRestaurantName{font-size:22px;color:var(--orange2);margin:12px 0}
 #profileLogoutBtn{width:100%;margin-top:20px}
-@media(max-width:360px){.wrap{padding:0 12px}.hero{padding:19px 16px}.hero:after{font-size:64px}.hero h2{font-size:22px}.card{padding:15px}.navbtn{font-size:17px}}
+@media(max-width:360px){.wrap{padding:0 12px}.hero{padding:21px 17px}.hero h2{font-size:22px}.card{padding:15px}.navbtn{font-size:12px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -111,14 +108,14 @@ hr{border:0;border-top:1px solid var(--line);margin:17px 0}
 <div id="dashboard" class="hidden">
 
 <div class="topbar">
-<div class="brand-lockup"><div class="brand-mark">🍱</div><div><div class="eyebrow">ZAIKABOX • RESTAURANT PARTNER</div><h1 id="restaurantName">Restaurant</h1></div></div>
+<div class="brand-lockup"><div><div class="eyebrow">ZAIKABOX • RESTAURANT PARTNER</div><h1 id="restaurantName">Restaurant</h1></div></div>
 <button class="secondary" id="logoutBtn" type="button">LOGOUT</button>
 </div>
 
 <section class="page" id="page-home">
 <div class="hero">
 <div class="eyebrow">YOUR RESTAURANT SPACE</div>
-<h2>Welcome back 👋</h2>
+<h2>Welcome back </h2>
 <p id="partnerMessage">Your restaurant workspace is ready. Manage orders and menu from here.</p>
 </div>
 <div class="stats">
@@ -127,9 +124,9 @@ hr{border:0;border-top:1px solid var(--line);margin:17px 0}
 </div>
 <div class="card">
 <h2>Quick actions</h2>
-<button class="primary shortcut" type="button" data-goto="orders">🧾 <span>Open Orders</span> <span style="margin-left:auto">›</span></button>
-<button class="secondary shortcut" type="button" data-goto="menu">🍽️ <span>Manage Menu</span> <span style="margin-left:auto">›</span></button>
-<button class="secondary shortcut" type="button" data-goto="profile">🏪 <span>Restaurant Profile</span> <span style="margin-left:auto">›</span></button>
+<button class="primary shortcut" type="button" data-goto="orders"> <span>Open Orders</span> <span style="margin-left:auto">›</span></button>
+<button class="secondary shortcut" type="button" data-goto="menu"> <span>Manage Menu</span> <span style="margin-left:auto">›</span></button>
+<button class="secondary shortcut" type="button" data-goto="profile"> <span>Restaurant Profile</span> <span style="margin-left:auto">›</span></button>
 </div>
 </section>
 
@@ -156,7 +153,7 @@ hr{border:0;border-top:1px solid var(--line);margin:17px 0}
 <textarea id="itemDescription" rows="2" maxlength="250" placeholder="Item details"></textarea>
 
 <label>Emoji</label>
-<input id="itemEmoji" maxlength="8" value="🍽️">
+<input id="itemEmoji" maxlength="8" value="">
 
 <label>Availability</label>
 <select id="itemAvailable">
@@ -188,7 +185,7 @@ hr{border:0;border-top:1px solid var(--line);margin:17px 0}
 
 <section class="page hidden" id="page-profile">
 <div class="card">
-<h2>Restaurant Profile 🏪</h2>
+<h2>Restaurant Profile </h2>
 <p class="small">Restaurant account connected to ZaikaBox.</p>
 <h3 id="profileRestaurantName">Restaurant</h3>
 <p class="small" id="profilePartnerEmail"></p>
@@ -198,10 +195,10 @@ hr{border:0;border-top:1px solid var(--line);margin:17px 0}
 </section>
 
 <nav class="navbar" aria-label="Partner navigation">
-<button class="navbtn active" type="button" data-page="home">⌂<small>Home</small></button>
-<button class="navbtn" type="button" data-page="orders">▣<small>Orders</small></button>
-<button class="navbtn" type="button" data-page="menu">☷<small>Menu</small></button>
-<button class="navbtn" type="button" data-page="profile">♙<small>Profile</small></button>
+<button class="navbtn active" type="button" data-page="home"><small>Home</small></button>
+<button class="navbtn" type="button" data-page="orders"><small>Orders</small></button>
+<button class="navbtn" type="button" data-page="menu"><small>Menu</small></button>
+<button class="navbtn" type="button" data-page="profile"><small>Profile</small></button>
 </nav>
 
 </div>
@@ -441,7 +438,7 @@ const available=item.available??true;
 return `
 <div class="item">
 <div class="row">
-<h3>${safe(item.emoji||"🍽️")} ${safe(item.name||"Food Item")}</h3>
+<h3>${safe(item.emoji||"")} ${safe(item.name||"Food Item")}</h3>
 <span class="tag">${available?"AVAILABLE":"UNAVAILABLE"}</span>
 </div>
 <p>Price: <b>₹${safe(item.price??0)}</b></p>
@@ -462,7 +459,7 @@ $("menuList").textContent="MENU ERROR: "+(error.code||"")+" "+error.message;
 function resetMenuForm(){
 $("menuForm").reset();
 $("editItemId").value="";
-$("itemEmoji").value="🍽️";
+$("itemEmoji").value="";
 $("saveItemBtn").textContent="ADD MENU ITEM";
 $("cancelEditBtn").classList.add("hidden");
 }
@@ -476,7 +473,7 @@ const name=$("itemName").value.trim();
 const price=Number($("itemPrice").value);
 const category=$("itemCategory").value.trim();
 const description=$("itemDescription").value.trim();
-const emoji=$("itemEmoji").value.trim()||"🍽️";
+const emoji=$("itemEmoji").value.trim()||"";
 const available=$("itemAvailable").value==="true";
 const editId=$("editItemId").value;
 
@@ -525,7 +522,7 @@ $("itemName").value=item.name||"";
 $("itemPrice").value=item.price??0;
 $("itemCategory").value=item.category||"";
 $("itemDescription").value=item.description||"";
-$("itemEmoji").value=item.emoji||"🍽️";
+$("itemEmoji").value=item.emoji||"";
 $("itemAvailable").value=String(item.available??true);
 $("saveItemBtn").textContent="SAVE CHANGES";
 $("cancelEditBtn").classList.remove("hidden");
