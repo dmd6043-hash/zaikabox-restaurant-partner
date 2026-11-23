@@ -363,13 +363,17 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 
 <section class="page hidden" id="page-profile">
 <div class="card">
-<h2>Restaurant Profile </h2>
-<p class="small">Restaurant account connected to ZaikaBox.</p>
-<h3 id="profileRestaurantName">Restaurant</h3>
-<p class="small" id="profilePartnerEmail"></p>
-<p class="small">Account status: Active</p>
-<button class="danger" type="button" id="profileLogoutBtn">LOGOUT</button>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><div class="small" style="color:#ffb24a;letter-spacing:2px;font-weight:800">RESTAURANT PARTNER</div><h2 style="margin:7px 0">Business Profile</h2><p class="small">Your restaurant performance at a glance.</p></div><div style="width:58px;height:58px;border-radius:18px;background:linear-gradient(135deg,#ffb24a,#a85b12);display:grid;place-items:center;font-size:27px">🏪</div></div>
+<h3 id="profileRestaurantName">Restaurant</h3><p class="small" id="profilePartnerEmail"></p><p class="small">Account status: Active</p>
 </div>
+<div class="card" style="border:1px solid rgba(255,178,74,.35);background:linear-gradient(145deg,#21170e,#101010)">
+<div class="small" style="color:#ffb24a;font-weight:800;letter-spacing:1.5px">PERFORMANCE OVERVIEW</div><h3 style="margin:6px 0">Your Business</h3><span class="tag">LIVE REPORT</span>
+<div style="display:flex;gap:8px;margin:14px 0;flex-wrap:wrap"><button type="button" class="secondary" data-profile-range="1" style="flex:1;min-width:80px">Today</button><button type="button" class="secondary" data-profile-range="7" style="flex:1;min-width:80px">7 Days</button><button type="button" class="secondary" data-profile-range="30" style="flex:1;min-width:80px">30 Days</button></div>
+<div id="profileStats" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px"><div class="small">Loading business performance...</div></div>
+<p id="profileReportNote" class="small" style="margin:14px 0 0;color:#aaa">Figures are based on orders received by this restaurant.</p>
+</div>
+<div class="card"><h3 style="margin-top:0">Recent Order Activity</h3><div id="profileRecentOrders" class="small">Loading recent activity...</div></div>
+<div class="card"><button class="danger" type="button" id="profileLogoutBtn">LOGOUT</button></div>
 </section>
 
 <nav class="navbar" aria-label="Partner navigation">
@@ -424,6 +428,8 @@ let authVersion=0;
 let loginInProgress=false;
 let partnerMenuItems=[];
 let partnerOrders=[];
+let partnerAllOrders=[];
+let profileRangeDays=1;
 let currentOrderFilter="New";
 let pendingRejectOrderId=null;
 let pendingAcceptOrderId=null;
@@ -1028,8 +1034,10 @@ $("ordersList").textContent="Connecting to live orders...";
 const ordersQuery=query(collection(db,"orders"),where("restaurantId","==",currentRestaurantId));
 
 ordersUnsubscribe=onSnapshot(ordersQuery,snapshot=>{
-partnerOrders=snapshot.docs.map(item=>({id:item.id,...item.data()})).filter(order=>order.paymentMethod==="COD" || order.paymentStatus==="Paid" || !order.paymentStatus);
-partnerOrders.sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));
+partnerAllOrders=snapshot.docs.map(item=>({id:item.id,...item.data()}));
+partnerAllOrders.sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));
+partnerOrders=partnerAllOrders.filter(order=>order.paymentMethod==="COD" || order.paymentStatus==="Paid" || !order.paymentStatus);
+renderProfileStats();
 updateIncomingOrderCount();
 renderOrders();
 },error=>{
@@ -1039,6 +1047,41 @@ setStatus("Live order listener error: "+error.message);
 });
 }
 
+function profileOrderDate(order){
+ const value=order.createdAt;
+ if(value?.toDate)return value.toDate();
+ if(value instanceof Date)return value;
+ if(typeof value==="number")return new Date(value);
+ return null;
+}
+function profileAmount(order){
+ const raw=order.total??order.grandTotal??order.totalAmount??order.amount??0;
+ const amount=Number(String(raw).replace(/[^0-9.]/g,""));
+ return Number.isFinite(amount)?amount:0;
+}
+function renderProfileStats(){
+ const host=$("profileStats"),recent=$("profileRecentOrders");
+ if(!host||!recent)return;
+ const now=new Date(),start=new Date(now);
+ if(profileRangeDays===1)start.setHours(0,0,0,0);
+ else{start.setDate(start.getDate()-(profileRangeDays-1));start.setHours(0,0,0,0);}
+ const selected=partnerAllOrders.filter(order=>{const date=profileOrderDate(order);return date&&date>=start&&date<=now;});
+ const status=o=>String(o.status||"New").toLowerCase();
+ const rejected=o=>status(o)==="rejected";
+ const cancelled=o=>status(o)==="cancelled"||status(o)==="canceled";
+ const delivered=o=>status(o)==="delivered";
+ const open=o=>["new","accepted","preparing","ready","not ready","out for delivery"].includes(status(o));
+ const value=selected.reduce((sum,o)=>sum+profileAmount(o),0);
+ const sales=selected.filter(delivered).reduce((sum,o)=>sum+profileAmount(o),0);
+ const money=n=>"₹"+Math.round(n).toLocaleString("en-IN");
+ const tile=(label,val,sub,color)=>'<div style="padding:14px;border-radius:15px;background:#111318;border:1px solid '+(color||"#292929")+'"><div class="small" style="color:#aaa;font-size:11px">'+label+'</div><div style="font-size:25px;font-weight:900;color:#ffb24a;margin:5px 0">'+val+'</div><div class="small" style="font-size:10px;color:#999">'+sub+'</div></div>';
+ host.innerHTML=tile("TOTAL ORDERS",selected.length,"Orders received")+tile("ORDER VALUE",money(value),"Total value of orders")+tile("DELIVERED SALES",money(sales),"Successfully delivered")+tile("COMPLETED",selected.filter(delivered).length,"Delivered orders","#245b3b")+tile("REJECTED",selected.filter(rejected).length,"Orders rejected","#7a3440")+tile("CANCELLED",selected.filter(cancelled).length,"Orders cancelled","#7a3440")+tile("IN PROGRESS",selected.filter(open).length,"New / preparing / ready")+tile("AVERAGE ORDER",money(selected.length?value/selected.length:0),"Average order value");
+ const latest=selected.slice(0,5);
+ recent.innerHTML=latest.length?latest.map(o=>{const d=profileOrderDate(o),label=d?d.toLocaleString("en-IN",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}):"Time unavailable";return '<div style="display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #292929"><div><b>#'+safe(o.id.slice(-6).toUpperCase())+'</b><div class="small">'+label+' · '+safe(String(o.status||"New").toUpperCase())+'</div></div><b style="color:#ffb24a;white-space:nowrap">'+money(profileAmount(o))+'</b></div>';}).join(""):"No orders found in this period.";
+ $("profileReportNote").textContent=profileRangeDays===1?"Showing orders received today. Order value includes all statuses; delivered sales includes delivered orders only.":"Showing the last "+profileRangeDays+" days. Order value includes all statuses; delivered sales includes delivered orders only.";
+ document.querySelectorAll("[data-profile-range]").forEach(button=>{const active=Number(button.dataset.profileRange)===profileRangeDays;button.style.background=active?"#a85b12":"";button.style.borderColor=active?"#ffb24a":"";button.style.color=active?"#fff":"";});
+}
+document.addEventListener("click",event=>{const button=event.target.closest("[data-profile-range]");if(!button)return;profileRangeDays=Number(button.dataset.profileRange)||1;renderProfileStats();});
 function updateIncomingOrderCount(){
 const count=partnerOrders.filter(order=>String(order.status||"New").toLowerCase()==="new").length;
 $("navNewOrderCount").textContent=String(count);
