@@ -849,12 +849,13 @@ $("partnerMessage").textContent="Logged in: "+(user.email||"");
 showPartnerPage("home");
 $("dashboard").classList.remove("hidden");
 
-setStatus("Account verified. Menu and orders loading...");
-await loadMenu();
-if(version!==authVersion)return;
+// Show the dashboard immediately; load menu separately so a slow menu query
+// does not keep the partner waiting on the login screen.
+setStatus("Account verified. Dashboard opening...");
 startLiveOrders();
 if(version!==authVersion)return;
-setStatus("SUCCESS: "+currentRestaurantName+" dashboard ready. Live orders active.");
+setStatus("SUCCESS: "+currentRestaurantName+" dashboard ready. Menu loading in background...");
+loadMenu();
 
 }catch(error){
 console.error("PARTNER VERIFICATION ERROR:",error);
