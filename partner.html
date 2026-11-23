@@ -1108,13 +1108,13 @@ $("prepTimePlus").addEventListener("click",()=>{selectedPrepMinutes=Math.min(30,
 $("cancelPrepTime").addEventListener("click",()=>{pendingAcceptOrderId=null;$("prepTimeDialog").classList.remove("open");});
 $("confirmAcceptOrder").addEventListener("click",async()=>{
 if(!pendingAcceptOrderId||!currentRestaurantId)return;
-const id=pendingAcceptOrderId,button=$("confirmAcceptOrder"),orderButton=$('ordersList').querySelector('button[data-order="'+CSS.escape(id)+'"]');
+const id=pendingAcceptOrderId,button=$("confirmAcceptOrder"),orderButton=Array.from($("ordersList").querySelectorAll("button[data-order]")).find(el=>el.dataset.order===id);
 button.disabled=true;button.textContent="ACCEPTING...";
 if(orderButton){orderButton.disabled=true;orderButton.textContent="UPDATING...";}
 try{
 const duration=Math.min(30,Math.max(5,Number(selectedPrepMinutes)||15));
 await updateDoc(doc(db,"orders",id),{status:"Preparing",acceptedAt:serverTimestamp(),preparingAt:serverTimestamp(),prepDurationMinutes:duration,estimatedReadyAt:new Date(Date.now()+duration*60000),updatedAt:serverTimestamp()});
-$("prepTimeDialog").classList.remove("open");pendingAcceptOrderId=null;setStatus("Order accepted. Preparation time set to "+duration+" minutes.");await loadOrders();
+$("prepTimeDialog").classList.remove("open");pendingAcceptOrderId=null;const acceptedOrder=partnerOrders.find(item=>item.id===id);if(acceptedOrder){acceptedOrder.status="Preparing";acceptedOrder.prepDurationMinutes=duration;acceptedOrder.estimatedReadyAt={toMillis:()=>Date.now()+duration*60000};}updateIncomingOrderCount();renderOrders();setStatus("Order accepted. Preparation time set to "+duration+" minutes.");
 }catch(error){alert("ORDER ACCEPT FAILED: "+(error.code||"")+" - "+error.message);setStatus("Order accept failed: "+error.message);if(orderButton){orderButton.disabled=false;orderButton.textContent="ACCEPT ORDER";}}
 finally{button.disabled=false;button.textContent="CONFIRM & ACCEPT";}
 });
