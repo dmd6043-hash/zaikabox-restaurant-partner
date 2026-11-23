@@ -310,40 +310,23 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 <button class="secondary" id="refreshMenuBtn" type="button">REFRESH</button>
 </div>
 
-<form id="menuForm">
-<input type="hidden" id="editItemId">
-
-<label>Item Name</label>
-<input id="itemName" required maxlength="80" placeholder="Example: Veg Momos">
-
-<label>Price (₹)</label>
-<input id="itemPrice" type="number" required min="1" step="1" placeholder="30">
-
-<label>Category</label>
-<input id="itemCategory" required maxlength="40" placeholder="Example: Momos">
-
-<label>Description</label>
-<textarea id="itemDescription" rows="2" maxlength="250" placeholder="Item details"></textarea>
-
-<label>Emoji</label>
-<input id="itemEmoji" maxlength="8" value="">
-
-<label>Availability</label>
-<select id="itemAvailable">
-<option value="true">Available</option>
-<option value="false">Unavailable</option>
-</select>
-
-<button class="primary" id="saveItemBtn" type="submit">ADD MENU ITEM</button>
-<button class="secondary hidden" id="cancelEditBtn" type="button">CANCEL EDIT</button>
-</form>
-
-<p id="menuMessage" class="small"></p>
-<hr>
-<hr><div class="eyebrow">INVENTORY CONTROL</div><h3>Stock Management</h3><p class="small">Mark sold-out items as Out of Stock. Mark them Available when restocked.</p><div class="stock-tabs"><button type="button" class="stock-tab active" data-stock-filter="available">Available Items</button><button type="button" class="stock-tab" data-stock-filter="out">Out of Stock</button></div><div id="stockList"></div><hr><h3>All Menu Items</h3><div id="menuList">Menu not loaded yet.</div>
+<div class="card" style="background:linear-gradient(145deg,#21170e,#101114);border:1px solid rgba(255,178,74,.3)"><div class="eyebrow">MENU STUDIO</div><h3 style="margin:6px 0">Create a delicious listing</h3><p class="small">Add clear photos, details, variants and tax information.</p>
+<form id="menuForm"><input type="hidden" id="editItemId"><input type="hidden" id="itemEmoji">
+<label>Item Name *</label><input id="itemName" required maxlength="80" placeholder="Example: Paneer Momos">
+<label>Food Type *</label><select id="itemFoodType"><option value="Veg">🟢 Veg</option><option value="Non-Veg">🔴 Non-Veg</option></select>
+<label>Menu Category *</label><input id="itemCategory" required maxlength="40" placeholder="Momos, Rolls, Snacks...">
+<label>Description</label><textarea id="itemDescription" rows="3" maxlength="500" placeholder="Ingredients, taste, portion size and details"></textarea>
+<label>Base Price (₹) *</label><input id="itemPrice" type="number" required min="1" step="0.01" placeholder="30">
+<label>Variants (optional)</label><textarea id="itemVariants" rows="3" placeholder="Half - 40&#10;Full - 70&#10;Large - 90"></textarea><p class="small">Enter one variant per line as Name - Price.</p>
+<label>GST</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><select id="itemGstEnabled"><option value="false">No GST added</option><option value="true">GST applicable</option></select><select id="itemGstRate"><option value="0">0%</option><option value="5">5%</option><option value="12">12%</option><option value="18">18%</option><option value="28">28%</option></select></div>
+<label>Item Photo URL</label><input id="itemImageUrl" type="url" placeholder="Paste photo URL (https://...)">
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0"><button class="secondary" id="makeAiPhotoPrompt" type="button">✨ CREATE AI PHOTO PROMPT</button><button class="secondary" id="previewItemPhoto" type="button">PREVIEW PHOTO</button></div>
+<p id="aiPhotoHelp" class="small">AI photo helper prepares a prompt for your preferred image AI tool. Paste the generated image URL above.</p><div id="itemPhotoPreview" style="display:none;margin:10px 0"><img id="itemPhotoPreviewImg" alt="Menu item preview" style="width:100%;max-height:190px;object-fit:cover;border-radius:14px"></div>
+<label>Availability</label><select id="itemAvailable"><option value="true">In Stock</option><option value="false">Out of Stock</option></select>
+<button class="primary" id="saveItemBtn" type="submit">ADD MENU ITEM</button><button class="secondary hidden" id="cancelEditBtn" type="button">CANCEL EDIT</button></form><p id="menuMessage" class="small"></p></div><div class="card"><h3>Menu Photo Tips</h3><p class="small">Use a clear, well-lit photo of the actual dish. AI-generated images should represent the item accurately.</p></div>
 </div>
 </section>
-
+<section class="page hidden" id="page-stock"><div class="card" style="background:linear-gradient(145deg,#21170e,#101114);border:1px solid rgba(255,178,74,.3)"><div class="eyebrow">INVENTORY CONTROL</div><h2>Stock Management</h2><p class="small">All menu items organised by category.</p><div class="stock-tabs"><button type="button" class="stock-tab active" data-stock-filter="all">All Items</button><button type="button" class="stock-tab" data-stock-filter="available">In Stock</button><button type="button" class="stock-tab" data-stock-filter="out">Out of Stock</button></div><div id="stockCategoryFilters" style="display:flex;gap:7px;flex-wrap:wrap;margin:10px 0"></div><div id="stockList">Menu not loaded yet.</div></div><div class="card"><h3>All Menu Items</h3><div id="menuList">Menu not loaded yet.</div></div></section>
 <section class="page hidden" id="page-orders">
 <div class="card">
 <div class="row">
@@ -388,6 +371,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 <button class="navbtn active" type="button" data-page="home"><small>Home</small></button>
 <button class="navbtn" type="button" data-page="orders"><small>New Orders</small><span id="navNewOrderCount" class="nav-count">0</span></button>
 <button class="navbtn" type="button" data-page="menu"><small>Menu</small></button>
+<button class="navbtn" type="button" data-page="stock"><small>Stock</small></button>
 <button class="navbtn" type="button" data-page="profile"><small>Profile</small></button>
 </nav>
 
@@ -442,7 +426,8 @@ let currentOrderFilter="New";
 let pendingRejectOrderId=null;
 let pendingAcceptOrderId=null;
 let selectedPrepMinutes=15;
-let currentStockFilter="available";
+let currentStockFilter="all";
+let currentStockCategory="all";
 let ordersUnsubscribe=null;
 
 function setStatus(message){
@@ -933,13 +918,17 @@ renderStockItems();
 }catch(error){console.error("MENU ERROR:",error);$("menuList").textContent="MENU ERROR: "+(error.code||"")+" "+error.message;$("stockList").textContent="Stock load failed.";}
 }
 function renderStockItems(){
-document.querySelectorAll("[data-stock-filter]").forEach(button=>button.classList.toggle("active",button.dataset.stockFilter===currentStockFilter));
-const list=partnerMenuItems.filter(item=>(item.available??true)===(currentStockFilter==="available"));
-if(!list.length){$("stockList").innerHTML='<div class="stock-empty">'+(currentStockFilter==="available"?"No available items.":"No out-of-stock items. All good!")+'</div>';return;}
-$("stockList").innerHTML=list.map(item=>{const available=item.available??true;return '<div class="stock-row"><div><h3>'+safe(item.name||"Food Item")+'</h3><p>₹'+safe(item.price??0)+' · '+safe(item.category||"Other")+'</p></div><button class="'+(available?"danger":"success")+'" data-stock-toggle="'+safe(item.id)+'">'+(available?"OUT OF STOCK":"RESTOCK")+'</button></div>';}).join("");
+ document.querySelectorAll("[data-stock-filter]").forEach(button=>button.classList.toggle("active",button.dataset.stockFilter===currentStockFilter));
+ const cats=[...new Set(partnerMenuItems.map(x=>String(x.category||"Other")))].sort();
+ const catHost=$("stockCategoryFilters");
+ if(catHost)catHost.innerHTML='<button class="stock-tab '+(currentStockCategory==="all"?"active":"")+'" data-stock-category="all" type="button">All Categories</button>'+cats.map(cat=>'<button class="stock-tab '+(currentStockCategory===cat?"active":"")+'" data-stock-category="'+safe(cat)+'" type="button">'+safe(cat)+'</button>').join("");
+ let list=partnerMenuItems.filter(x=>currentStockFilter==="all"||(x.available??true)===(currentStockFilter==="available"));
+ if(currentStockCategory!=="all")list=list.filter(x=>String(x.category||"Other")===currentStockCategory);
+ if(!list.length){$("stockList").innerHTML='<div class="stock-empty">No items found.</div>';return;}
+ $("stockList").innerHTML=list.map(item=>{const available=item.available??true;return '<div class="stock-row" style="align-items:center"><div style="display:flex;gap:10px;align-items:center">'+(item.imageUrl?'<img src="'+safe(item.imageUrl)+'" style="width:52px;height:52px;object-fit:cover;border-radius:10px">':'🍽️')+'<div><h3>'+safe(item.name||"Food Item")+'</h3><p>₹'+safe(item.price??0)+' · '+safe(item.category||"Other")+' · '+safe(item.foodType||"Veg")+'</p><span class="tag">'+(available?"IN STOCK":"OUT OF STOCK")+'</span></div></div><button class="'+(available?"danger":"success")+'" data-stock-toggle="'+safe(item.id)+'">'+(available?"OUT OF STOCK":"RESTOCK")+'</button></div>';}).join("");
 }
-$("stockList").addEventListener("click",async event=>{const button=event.target.closest("[data-stock-toggle]");if(!button||!currentRestaurantId)return;const item=partnerMenuItems.find(x=>x.id===button.dataset.stockToggle);if(!item)return;button.disabled=true;try{await updateDoc(doc(db,"restaurants",currentRestaurantId,"menuItems",item.id),{available:!(item.available??true),updatedAt:serverTimestamp()});await loadMenu();}catch(error){alert("Stock update failed: "+error.message);button.disabled=false;}});
 document.querySelectorAll("[data-stock-filter]").forEach(button=>button.addEventListener("click",()=>{currentStockFilter=button.dataset.stockFilter;renderStockItems();}));
+$("stockCategoryFilters").addEventListener("click",event=>{const button=event.target.closest("[data-stock-category]");if(!button)return;currentStockCategory=button.dataset.stockCategory;renderStockItems();});
 
 
 // RESET MENU FORM
