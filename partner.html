@@ -1151,6 +1151,7 @@ const mins=Math.floor(Math.abs(remaining)/60),secs=Math.abs(remaining)%60;
 const timerText=remaining>0?("PREPARING · "+mins+":"+String(secs).padStart(2,"0")+" LEFT"):("⚠ OVERDUE · -"+mins+":"+String(secs).padStart(2,"0"));
 actions='<div class="prep-timer" data-prep-timer="'+safe(order.id)+'" data-ready-at="'+safe(readyAt)+'"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:130px"><div class="prep-timer-label">'+timerText+'</div><div class="small">Estimated preparation time: '+safe(eta)+' minutes</div></div><button class="success" style="width:auto;min-width:112px;margin:0;flex:0 0 auto" data-mark-ready="'+safe(order.id)+'">✓ READY</button></div><div class="small" style="margin-top:8px">Food check karke READY dabayein.</div></div>';
 }
+ else if(normalized==="not ready")actions='<div class="prep-timer" style="border-color:#a63d50;background:linear-gradient(120deg,#260d14,#111318)"><div class="prep-timer-label" style="color:#ff8292">DELIVERY PARTNER REPORTED: NOT READY</div><div class="small">Please finish preparing the order. When the food is actually ready, tap below to alert the Delivery Partner again.</div><button class="success" style="width:100%;margin-top:12px" data-mark-ready="'+safe(order.id)+'">✓ MARK READY</button></div>';
 else if(normalized==="ready")actions='<div class="order-actions"><button class="success" disabled>✓ READY FOR '+(orderType.toLowerCase().includes("pickup")?"PICKUP":"DELIVERY")+'</button></div>';
 else if(normalized==="rejected")actions='<div class="small">Rejected reason: '+safe(order.rejectionReason||"Not recorded")+'</div>';
 return '<article class="order-card '+(isNew?"is-new":"")+' status-'+safe(normalized)+'"><div class="order-head"><h3>'+(isNew?"NEW ORDER":"ORDER DETAILS")+'</h3><span class="tag order-status-pill '+safe(normalized)+'">'+safe(status.toUpperCase())+'</span></div><div class="order-body"><div class="order-meta"><span class="order-chip orange">'+safe(orderType.toUpperCase())+'</span><span class="order-chip">'+safe(payment)+'</span><span class="order-chip">PAYMENT: '+safe(payStatus.toUpperCase())+'</span></div><div class="order-items">'+lines+'</div><div class="order-total"><span>Order total</span><strong>₹'+safe(total)+'</strong></div><div class="order-customer"><b>CUSTOMER</b><br>'+safe(order.customerName||order.name||"Customer")+'<br>'+safe(order.customerPhone||order.phone||"Phone not available")+'<br>'+safe(order.address||"Pickup order")+'</div><p class="small">'+safe(date)+'</p>'+actions+'</div></article>';
@@ -1170,11 +1171,12 @@ if(!button||!currentRestaurantId)return;
 const id=button.dataset.markReady,order=partnerOrders.find(item=>item.id===id);
 if(!order)return;
 const type=String(order.orderType||order.deliveryType||order.fulfillmentType||"Delivery").toLowerCase().includes("pickup")?"Pickup":"Delivery";
-if(!confirm("Is the food ready? Send a READY alert to the Delivery Partner?"))return;
 button.disabled=true;button.textContent="SAVING...";
 try{
-await updateDoc(doc(db,"orders",id),{status:"Ready",readyAt:serverTimestamp(),handoverType:type,updatedAt:serverTimestamp()});stopOrderAlarm(id);setStatus("Order marked READY. Delivery Partner ko alert bhej diya gaya.");
-}catch(error){alert("READY UPDATE FAILED: "+error.message);button.disabled=false;button.textContent="MARK READY FOR "+type.toUpperCase();}
+ await updateDoc(doc(db,"orders",id),{status:"Ready",readyAt:serverTimestamp(),handoverType:type,readyConfirmedByRestaurant:true,updatedAt:serverTimestamp()});
+ stopOrderAlarm(id);
+ setStatus("Order marked READY. The Delivery Partner has been alerted.");
+ }catch(error){alert("READY UPDATE FAILED: "+error.message);button.disabled=false;button.textContent="✓ MARK READY";}
 });
 // ACCEPT / REJECT ORDER ACTIONS
 $("ordersList").addEventListener("click",async event=>{
