@@ -189,7 +189,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 <div id="registerPanel" class="registration-card hidden">
   <div class="eyebrow">PARTNER ONBOARDING</div>
   <h2>Register Your Restaurant</h2>
-  <p class="small">Application submit karein. Super Admin approval se pehle restaurant active nahi hoga.</p>
+  <p class="small">Submit your application. Your restaurant will not become active until the Super Admin approves it.</p>
   <form id="restaurantRegistrationForm">
     <div class="registration-grid">
       <label for="regOwnerName">Owner full name *</label>
@@ -231,7 +231,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
       <label for="regShopPhoto">Restaurant / shop front photo</label>
       <input id="regShopPhoto" type="file" accept="image/jpeg,image/png">
     </div>
-    <div class="registration-note">Masked Aadhaar (pehle 8 digits hidden), PAN card aur valid FSSAI certificate WhatsApp par ZaikaBox ko bhejne honge. Full Aadhaar card/number share na karein. Form ki details Admin Dashboard mein save hongi; documents WhatsApp par applicant ke Send karne ke baad milenge. Bank details payout activate karne se pehle mandatory hongi.</div>
+    <div class="registration-note">You must send your masked Aadhaar (first 8 digits hidden), PAN card, and valid FSSAI certificate to ZaikaBox on WhatsApp. Do not share your full Aadhaar card or number. Form details will be saved in the Admin Dashboard; documents will be received only after you attach and send them on WhatsApp. Bank details are required before payouts can be activated.</div>
     <label style="display:flex;gap:9px;align-items:flex-start;font-weight:500"><input id="regConsent" type="checkbox" required style="width:20px;min-height:20px;margin:2px 0"> I confirm that the information is correct and I agree to Admin verification.</label>
     <button class="primary" id="submitRegistrationBtn" type="submit">SUBMIT APPLICATION</button>
     <button class="secondary" id="registerBackBtn" type="button">BACK TO LOGIN</button>
@@ -242,7 +242,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 <div id="correctionPanel" class="registration-card hidden">
   <div class="eyebrow">APPLICATION UPDATE</div>
   <h2>✎ Edit Registration</h2>
-  <p class="small">Super Admin ne correction maanga hai. Details sudhar kar dobara submit karein.</p>
+  <p class="small">The Super Admin has requested corrections. Update the details and submit again.</p>
   <div class="card"><b>Correction reason</b><p id="correctionReasonText" class="small"></p></div>
   <form id="correctionForm">
     <label>Owner full name *</label><input id="fixOwnerName" required maxlength="100">
@@ -253,7 +253,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
     <label>Business type *</label><input id="fixBusinessType" required maxlength="80">
     <label>Food category *</label><select id="fixFoodType" required><option>Pure Veg</option><option>Non-Veg</option><option>Both Veg & Non-Veg</option></select>
     <label>FSSAI number</label><input id="fixFssai" maxlength="30">
-    <p class="small">Agar document dobara dena hai to nayi file select karein. File Firebase mein upload nahi hoti; WhatsApp par manually attach karni hogi.</p>
+    <p class="small">To replace a document, select a new file. Files are not uploaded to Firebase; you must attach them manually on WhatsApp.</p>
     <label>Masked Aadhaar (optional)</label><input id="fixOwnerIdDoc" type="file" accept="image/jpeg,image/png,application/pdf">
     <label>PAN card (optional)</label><input id="fixPanDoc" type="file" accept="image/jpeg,image/png,application/pdf">
     <label>FSSAI certificate (optional)</label><input id="fixFssaiDoc" type="file" accept="image/jpeg,image/png,application/pdf">
@@ -272,7 +272,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
   <p>Our ZaikaBox team will review your application and contact you soon.</p>
   <p class="small">Your application is pending Super Admin approval. You cannot start operations until approval is granted.</p>
   <button class="primary" id="successWhatsAppBtn" type="button" style="width:100%;min-height:50px;margin-top:18px">OPEN WHATSAPP &amp; SEND DOCUMENTS</button>
-  <p class="small">WhatsApp chat khulega. Aadhaar (masked), PAN aur FSSAI files ko chat mein attach karke Send dabayein.</p>
+  <p class="small">WhatsApp will open. Attach your masked Aadhaar, PAN, and FSSAI files in the chat, then tap Send.</p>
   <button class="secondary" id="successBackToLoginBtn" type="button" style="width:100%;min-height:44px;margin-top:8px">BACK TO LOGIN</button>
 </div>
 
@@ -289,7 +289,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 <h2>Welcome back </h2>
 <p id="partnerMessage">Your restaurant workspace is ready. Manage orders and menu from here.</p>
 <div class="row" style="margin-top:18px;justify-content:flex-start;gap:10px"><span id="restaurantOnlineBadge" class="tag">● ONLINE</span><button class="danger" id="toggleRestaurantOnline" type="button" style="margin:0">GO OFFLINE</button></div>
-<p class="small" id="restaurantOnlineHelp" style="margin-top:9px">Online hone par customers aapke restaurant ko order ke liye dekh sakte hain.</p>
+<p class="small" id="restaurantOnlineHelp" style="margin-top:9px">When you are online, customers can see your restaurant and place orders.</p>
 </div>
 <div class="stats">
 <div class="stat"><strong>LIVE</strong><span>Order connection</span></div>
@@ -340,7 +340,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 
 <p id="menuMessage" class="small"></p>
 <hr>
-<hr><div class="eyebrow">INVENTORY CONTROL</div><h3>Stock Management</h3><p class="small">Khatam item ko Out of Stock karein. Restock hone par Available karein.</p><div class="stock-tabs"><button type="button" class="stock-tab active" data-stock-filter="available">Available Items</button><button type="button" class="stock-tab" data-stock-filter="out">Out of Stock</button></div><div id="stockList"></div><hr><h3>All Menu Items</h3><div id="menuList">Menu not loaded yet.</div>
+<hr><div class="eyebrow">INVENTORY CONTROL</div><h3>Stock Management</h3><p class="small">Mark sold-out items as Out of Stock. Mark them Available when restocked.</p><div class="stock-tabs"><button type="button" class="stock-tab active" data-stock-filter="available">Available Items</button><button type="button" class="stock-tab" data-stock-filter="out">Out of Stock</button></div><div id="stockList"></div><hr><h3>All Menu Items</h3><div id="menuList">Menu not loaded yet.</div>
 </div>
 </section>
 
@@ -357,7 +357,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 <button class="order-tab" type="button" data-order-filter="Preparing">Preparing</button><button class="order-tab" type="button" data-order-filter="Ready">Ready</button>
 <button class="order-tab" type="button" data-order-filter="All">All Orders</button>
 </div>
-<div id="ordersList">Orders loading...</div><div id="prepTimeDialog" class="prep-time-dialog" role="dialog" aria-modal="true" aria-label="Set preparation time"><div class="prep-time-modal"><h3>Set Preparation Time</h3><p class="small">Order accept karne se pehle food ready hone ka estimated time set karein.</p><div class="prep-time-stepper"><button type="button" id="prepTimeMinus" aria-label="Decrease preparation time">−</button><strong><span id="prepTimeValue">15</span><small>MINUTES</small></strong><button type="button" id="prepTimePlus" aria-label="Increase preparation time">+</button></div><p class="small">Minimum 5 minutes · Maximum 30 minutes</p><div class="prep-time-actions"><button type="button" class="secondary" id="cancelPrepTime">CANCEL</button><button type="button" class="success" id="confirmAcceptOrder">CONFIRM & ACCEPT</button></div></div></div><div id="rejectDialog" class="reject-panel" role="dialog" aria-label="Reject order reason"><h3>Reject Order</h3><p class="small">Customer ko genuine reason select karke batayein.</p><label for="rejectReason">Reason</label><select id="rejectReason"><option value="">Select reason</option><option>Item out of stock</option><option>Restaurant is currently full / high order volume</option><option>Restaurant is near closing time</option><option>Temporary kitchen/equipment issue</option><option>Delivery/pickup service unavailable</option><option>Other</option></select><label for="rejectNote">Extra note (optional)</label><textarea id="rejectNote" rows="2" maxlength="180" placeholder="Short explanation"></textarea><div class="reject-actions"><button type="button" class="secondary" id="cancelRejectBtn">CANCEL</button><button type="button" class="danger" id="confirmRejectBtn">CONFIRM REJECTION</button></div></div>
+<div id="ordersList">Orders loading...</div><div id="prepTimeDialog" class="prep-time-dialog" role="dialog" aria-modal="true" aria-label="Set preparation time"><div class="prep-time-modal"><h3>Set Preparation Time</h3><p class="small">Set the estimated food preparation time before accepting the order.</p><div class="prep-time-stepper"><button type="button" id="prepTimeMinus" aria-label="Decrease preparation time">−</button><strong><span id="prepTimeValue">15</span><small>MINUTES</small></strong><button type="button" id="prepTimePlus" aria-label="Increase preparation time">+</button></div><p class="small">Minimum 5 minutes · Maximum 30 minutes</p><div class="prep-time-actions"><button type="button" class="secondary" id="cancelPrepTime">CANCEL</button><button type="button" class="success" id="confirmAcceptOrder">CONFIRM & ACCEPT</button></div></div></div><div id="rejectDialog" class="reject-panel" role="dialog" aria-label="Reject order reason"><h3>Reject Order</h3><p class="small">Select a valid reason to explain the rejection to the customer.</p><label for="rejectReason">Reason</label><select id="rejectReason"><option value="">Select reason</option><option>Item out of stock</option><option>Restaurant is currently full / high order volume</option><option>Restaurant is near closing time</option><option>Temporary kitchen/equipment issue</option><option>Delivery/pickup service unavailable</option><option>Other</option></select><label for="rejectNote">Extra note (optional)</label><textarea id="rejectNote" rows="2" maxlength="180" placeholder="Short explanation"></textarea><div class="reject-actions"><button type="button" class="secondary" id="cancelRejectBtn">CANCEL</button><button type="button" class="danger" id="confirmRejectBtn">CONFIRM REJECTION</button></div></div>
 </div>
 </section>
 
@@ -465,7 +465,7 @@ badge.style.color=isRestaurantOnline?"#75e7b5":"#ff8796";
 badge.style.borderColor=isRestaurantOnline?"#267c5a":"#8e3444";
 button.textContent=isRestaurantOnline?"GO OFFLINE":"GO ONLINE";
 button.className=isRestaurantOnline?"danger":"success";
-help.textContent=isRestaurantOnline?"Restaurant online hai. Customers order place kar sakte hain.":"Restaurant offline hai. Naye orders temporarily band rahenge.";
+help.textContent=isRestaurantOnline?"Your restaurant is online. Customers can place orders.":"Your restaurant is offline. New orders are temporarily paused.";
 }
 $("toggleRestaurantOnline").addEventListener("click",async()=>{
 if(!currentRestaurantId)return;
@@ -477,7 +477,7 @@ await updateDoc(doc(db,"restaurants",currentRestaurantId),{isAcceptingOrders:nex
 setStatus(next?"Restaurant is now ONLINE.":"Restaurant is now OFFLINE.");
 }catch(error){
 console.error("RESTAURANT ONLINE STATUS ERROR:",error);
-alert("Online/Offline status update nahi hua: "+error.message);
+alert("Could not update online/offline status: "+error.message);
 renderRestaurantOnlineStatus();
 }finally{button.disabled=false;}
 });
@@ -502,12 +502,12 @@ ordersUnsubscribe=null;
 
 function explainAuthError(error){
 const code=error?.code||"unknown";
-if(code==="auth/api-key-not-valid")return "Firebase API key invalid. Config check karein.";
-if(code==="auth/invalid-credential"||code==="auth/wrong-password")return "Email ya password galat hai.";
-if(code==="auth/user-not-found")return "Is email ka Firebase account nahi mila.";
-if(code==="auth/too-many-requests")return "Bahut login attempts hue. Thodi der baad try karein.";
-if(code==="auth/network-request-failed")return "Internet connection check karein.";
-if(code==="auth/operation-not-allowed")return "Firebase Console mein Email/Password login enable karein.";
+if(code==="auth/api-key-not-valid")return "Invalid Firebase API key. Please check the configuration.";
+if(code==="auth/invalid-credential"||code==="auth/wrong-password")return "Incorrect email or password.";
+if(code==="auth/user-not-found")return "No Firebase account was found for this email.";
+if(code==="auth/too-many-requests")return "Too many login attempts. Please try again later.";
+if(code==="auth/network-request-failed")return "Please check your internet connection.";
+if(code==="auth/operation-not-allowed")return "Enable Email/Password sign-in in the Firebase Console.";
 return "LOGIN ERROR: "+code+" - "+(error?.message||"Unknown error");
 }
 
@@ -535,12 +535,12 @@ $("useCurrentLocationBtn").addEventListener("click",()=>{
   const button=$("useCurrentLocationBtn");
   const message=$("locationMessage");
   if(!navigator.geolocation){
-    message.textContent="Is browser mein location support nahi hai. Address manually bhariye.";
+    message.textContent="Location is not supported in this browser. Please enter the address manually.";
     return;
   }
   button.disabled=true;
   button.textContent="DETECTING LOCATION...";
-  message.textContent="GPS location li ja rahi hai. Browser permission allow karein...";
+  message.textContent="Getting your GPS location. Please allow location access in your browser...";
   navigator.geolocation.getCurrentPosition(async position=>{
     try{
       const {latitude,longitude}=position.coords;
@@ -555,13 +555,13 @@ $("useCurrentLocationBtn").addEventListener("click",()=>{
       message.textContent="✓ Current address filled. Please check and correct the address/landmark before submitting.";
     }catch(error){
       console.error("CURRENT ADDRESS LOOKUP ERROR:",error);
-      message.textContent="Address automatically nahi mil paya. Please restaurant address manually bhariye.";
+      message.textContent="Could not retrieve the address automatically. Please enter the restaurant address manually.";
     }finally{
       button.disabled=false;
       button.textContent="📍 USE CURRENT LOCATION";
     }
   },error=>{
-    const reason=error.code===1?"Location permission denied. Browser settings mein location allow karein.":error.code===2?"Current location unavailable. GPS on karke dobara try karein.":"Location request timed out. Dobara try karein.";
+    const reason=error.code===1?"Location permission denied. Please allow location access in your browser settings.":error.code===2?"Current location is unavailable. Turn on GPS and try again.":"The location request timed out. Please try again.";
     message.textContent=reason;
     button.disabled=false;
     button.textContent="📍 USE CURRENT LOCATION";
@@ -587,18 +587,18 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
     shopPhoto:$("regShopPhoto").files[0]||null
   };
   if(!selectedDocs.ownerId || !selectedDocs.pan || !selectedDocs.fssai || !fssaiNumber){
-    $("registrationMessage").textContent="Masked Aadhaar, PAN card, FSSAI number aur FSSAI certificate sab mandatory hain.";
+    $("registrationMessage").textContent="Masked Aadhaar, PAN card, FSSAI number, and FSSAI certificate are all required.";
     return;
   }
   const allowedTypes=["image/jpeg","image/png","application/pdf"];
   for(const [kind,file] of Object.entries(selectedDocs)){
     if(!file)continue;
     if(file.size>5*1024*1024){
-      $("registrationMessage").textContent="Har document maximum 5 MB hona chahiye.";
+      $("registrationMessage").textContent="Each document must be 5 MB or smaller.";
       return;
     }
     if(!allowedTypes.includes(file.type) || (kind==="shopPhoto" && file.type==="application/pdf")){
-      $("registrationMessage").textContent="Sirf JPG, PNG aur PDF allowed hain. Shop photo JPG/PNG honi chahiye.";
+      $("registrationMessage").textContent="Only JPG, PNG, and PDF files are allowed. The shop photo must be JPG or PNG.";
       return;
     }
   }
@@ -615,11 +615,11 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
   button.classList.add("is-loading");
   button.setAttribute("aria-busy","true");
   button.innerHTML='<span class="submit-spinner" aria-hidden="true"></span><span>SUBMITTING...</span>';
-  $("registrationMessage").textContent="Application details securely save ho rahi hain...";
+  $("registrationMessage").textContent="Securely saving your application details...";
   registrationInProgress=true;
   try{
     let user=auth.currentUser;
-    if(user && user.email!==email)throw new Error("Pehle current account se logout karein, phir registration email use karein.");
+    if(user && user.email!==email)throw new Error("Please log out of the current account first, then use the registration email.");
     if(!user){
       try{user=(await createUserWithEmailAndPassword(auth,email,password)).user;}
       catch(authError){
@@ -630,7 +630,7 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
     const uid=user.uid;
     const applicationRef=doc(db,"restaurantApplications",uid);
     const existingApplication=await getDoc(applicationRef);
-    if(existingApplication.exists())throw new Error("Is email se application pehle hi submit ho chuki hai. Duplicate application nahi banayi gayi. Admin review ka wait karein.");
+    if(existingApplication.exists())throw new Error("An application has already been submitted with this email. No duplicate application was created. Please wait for Admin review.");
     const application={
       applicantUid:uid,ownerName,phone,email,restaurantName,address,city,businessType,foodType,
       fssaiNumber,fssaiProvided:fssaiNumber.trim().length>0,
@@ -653,7 +653,7 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
       "Documents to attach: Masked Aadhaar ("+selectedDocs.ownerId.name+"), PAN ("+selectedDocs.pan.name+"), FSSAI certificate ("+selectedDocs.fssai.name+")"+(selectedDocs.shopPhoto?", Shop photo ("+selectedDocs.shopPhoto.name+")":""),
       "Applicant consented to share these documents for verification."
     ].join("\n");
-    $("registrationMessage").textContent="Application save ho gayi. WhatsApp chat khol rahe hain...";
+    $("registrationMessage").textContent="Application saved. Opening WhatsApp...";
     const whatsappMessage=applicationText+"\n\nPlease attach the selected masked Aadhaar, PAN and FSSAI files in this chat, then press Send.";
     const whatsappUrl="https://wa.me/918319014718?text="+encodeURIComponent(whatsappMessage);
     $("successWhatsAppBtn").dataset.url=whatsappUrl;
@@ -665,7 +665,7 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
     $("registerPanel").classList.add("hidden");$("loginBox").classList.add("hidden");
     $("registrationSuccess").style.display="block";
     $("registrationSuccess").querySelector("p").textContent="Your registration details have been saved successfully.";
-    $("registrationSuccess").querySelectorAll("p")[1].textContent="Application details saved. WhatsApp par selected documents attach karke Send karna zaroori hai.";
+    $("registrationSuccess").querySelectorAll("p")[1].textContent="Application details saved. You must attach the selected documents on WhatsApp and tap Send.";
     setStatus("Application saved. WhatsApp document sharing is ready; Admin approval pending.");
   }catch(error){
     try{if(whatsappTab && !whatsappTab.closed)whatsappTab.close();}catch(_){}
@@ -695,14 +695,14 @@ function showCorrectionApplication(application){
   $("fixBusinessType").value=application.businessType||"";
   $("fixFoodType").value=application.foodType||"Pure Veg";
   $("fixFssai").value=application.fssaiNumber||"";
-  setStatus("Correction Required: Details edit karein aur dobara submit karein.");
+  setStatus("Correction Required: Edit the details and submit again.");
 }
 $("correctionLogoutBtn").addEventListener("click",logoutPartner);
 
 $("correctionForm").addEventListener("submit",async event=>{
   event.preventDefault();
   const user=auth.currentUser;
-  if(!user||!correctionApplication){setStatus("Please dobara login karein.");return;}
+  if(!user||!correctionApplication){setStatus("Please log in again.");return;}
   const button=$("resubmitCorrectionBtn");
   const ownerName=$("fixOwnerName").value.trim();
   const phone=$("fixPhone").value.trim();
@@ -722,7 +722,7 @@ $("correctionForm").addEventListener("submit",async event=>{
   for(const [key,file] of Object.entries(files)){
     if(!file)continue;
     if(file.size>5*1024*1024||!allowed.includes(file.type)||(key==="shopPhoto"&&file.type==="application/pdf")){
-      setStatus("Selected document invalid hai. Maximum 5 MB; JPG/PNG/PDF allowed (shop photo JPG/PNG).");return;
+      setStatus("The selected document is invalid. Maximum size: 5 MB. JPG/PNG/PDF allowed (shop photo: JPG/PNG).");return;
     }
   }
   if(!/^\+?[1-9]\d{6,14}$/.test(phone.replace(/[\s().-]/g,""))){
@@ -750,7 +750,7 @@ $("correctionForm").addEventListener("submit",async event=>{
     $("correctionPanel").classList.add("hidden");
     $("loginBox").classList.remove("hidden");
     await signOut(auth);
-    setStatus("Application resubmitted successfully. WhatsApp mein replacement documents attach karein: "+wa);
+    setStatus("Application resubmitted successfully. Attach the replacement documents on WhatsApp: "+wa);
     window.location.href=wa;
   }catch(error){
     console.error(error);setStatus("Correction save error: "+(error.code||"")+" "+error.message);
@@ -771,10 +771,10 @@ return;
 loginInProgress=true;
 $("loginBtn").disabled=true;
 $("loginBtn").textContent="LOGGING IN...";
-setStatus("Firebase login request bheja ja raha hai...");
+setStatus("Sending Firebase login request...");
 try{
 await signInWithEmailAndPassword(auth,email,password);
-setStatus("Login successful. Partner account check ho raha hai...");
+setStatus("Login successful. Checking your partner account...");
 }catch(error){
 console.error("LOGIN ERROR:",error);
 setStatus(explainAuthError(error));
@@ -848,29 +848,29 @@ if(!accountSnapshot.exists()){
     if(["rejected","application rejected"].includes(String(appStatus).trim().toLowerCase())){
       await signOut(auth);
       $("loginBox").classList.remove("hidden");
-      setStatus("Application rejected. ZaikaBox support se sampark karein.");
+      setStatus("Application rejected. Please contact ZaikaBox Support.");
       return;
     }
     await signOut(auth);
     setStatus("Application status: "+appStatus+". Super Admin approval ke baad hi partner dashboard activate hoga.");
     return;
   }
-  throw new Error("accounts document nahi mila. UID: "+user.uid);
+  throw new Error("The accounts document was not found. UID: "+user.uid);
 }
 
 const account=accountSnapshot.data();
-if(account.role!=="restaurant")throw new Error("Account role restaurant nahi hai.");
-if(account.active!==true)throw new Error("Partner account active nahi hai.");
-if(!account.restaurantId)throw new Error("restaurantId missing hai.");
+if(account.role!=="restaurant")throw new Error("The account role is not restaurant.");
+if(account.active!==true)throw new Error("The partner account is not active.");
+if(!account.restaurantId)throw new Error("restaurantId is missing.");
 
 currentRestaurantId=account.restaurantId;
 
 const restaurantSnapshot=await getDoc(doc(db,"restaurants",currentRestaurantId));
 if(version!==authVersion)return;
-if(!restaurantSnapshot.exists())throw new Error("Restaurant record nahi mila: "+currentRestaurantId);
+if(!restaurantSnapshot.exists())throw new Error("Restaurant record was not found: "+currentRestaurantId);
 
 const restaurant=restaurantSnapshot.data();
-if(restaurant.active===false)throw new Error("Restaurant inactive hai.");
+if(restaurant.active===false)throw new Error("The restaurant is inactive.");
 
 currentRestaurantName=restaurant.name||"Restaurant";
 isRestaurantOnline=restaurant.isAcceptingOrders!==false && restaurant.isOnline!==false;
@@ -898,7 +898,7 @@ stopLiveOrders();
 $("dashboard").classList.add("hidden");
 $("loginBox").classList.remove("hidden");
 $("errorLogoutBtn").classList.remove("hidden");
-if(String(error.message||"").includes("accounts document nahi mila")){setStatus("PARTNER ACCOUNT NOT READY: Is UID ke liye accounts/{UID} record nahi mila. Super Admin ko approval ke baad account record create/link karna hoga. Logout karke baad mein try karein.");}else{setStatus("PARTNER ERROR: "+(error.code||"unknown")+" - "+error.message);}
+if(String(error.message||"").includes("accounts document nahi mila")){setStatus("PARTNER ACCOUNT NOT READY: No accounts/{UID} record was found for this UID. The Super Admin must create/link the account record after approval. Please log out and try again later.");}else{setStatus("PARTNER ERROR: "+(error.code||"unknown")+" - "+error.message);}
 }
 },error=>{
 console.error("AUTH STATE ERROR:",error);
@@ -913,7 +913,7 @@ try{
 const snapshot=await getDocs(menuCollection());
 partnerMenuItems=snapshot.docs.map(item=>({id:item.id,...item.data()}));
 partnerMenuItems.sort((a,b)=>String(a.name||"").localeCompare(String(b.name||"")));
-if(!partnerMenuItems.length){$("menuList").innerHTML='<p class="small">Abhi menu item nahi hai.</p>';$("stockList").innerHTML='<div class="stock-empty">No menu items yet.</div>';return;}
+if(!partnerMenuItems.length){$("menuList").innerHTML='<p class="small">There are no menu items yet.</p>';$("stockList").innerHTML='<div class="stock-empty">No menu items yet.</div>';return;}
 $("menuList").innerHTML=partnerMenuItems.map(item=>{const available=item.available??true;return '<div class="item"><div class="row"><h3>'+safe(item.name||"Food Item")+'</h3><span class="tag">'+(available?"AVAILABLE":"OUT OF STOCK")+'</span></div><p>Price: <b>₹'+safe(item.price??0)+'</b></p><p class="small">Category: '+safe(item.category||"Other")+'</p><p class="small">'+safe(item.description||"")+'</p><button class="primary" data-action="edit" data-id="'+safe(item.id)+'">EDIT</button><button class="'+(available?"danger":"success")+'" data-action="toggle" data-id="'+safe(item.id)+'">'+(available?"MARK OUT OF STOCK":"MARK AVAILABLE")+'</button><button class="danger" data-action="delete" data-id="'+safe(item.id)+'">DELETE</button></div>';}).join("");
 renderStockItems();
 }catch(error){console.error("MENU ERROR:",error);$("menuList").textContent="MENU ERROR: "+(error.code||"")+" "+error.message;$("stockList").textContent="Stock load failed.";}
@@ -1004,7 +1004,7 @@ $("menuForm").scrollIntoView({behavior:"smooth"});
 await updateDoc(itemRef,{available:!(item.available??true),updatedAt:serverTimestamp()});
 await loadMenu();
 }else if(action==="delete"){
-if(!confirm("Is menu item ko delete karna hai?"))return;
+if(!confirm("Are you sure you want to delete this menu item?"))return;
 await deleteDoc(itemRef);
 await loadMenu();
 $("menuMessage").textContent="Menu item deleted.";
@@ -1024,7 +1024,7 @@ $("refreshMenuBtn").addEventListener("click",loadMenu);
 function startLiveOrders(){
 if(!currentRestaurantId)return;
 stopLiveOrders();
-$("ordersList").textContent="Live orders connect ho rahe hain...";
+$("ordersList").textContent="Connecting to live orders...";
 const ordersQuery=query(collection(db,"orders"),where("restaurantId","==",currentRestaurantId));
 
 ordersUnsubscribe=onSnapshot(ordersQuery,snapshot=>{
@@ -1170,7 +1170,7 @@ if(!button||!currentRestaurantId)return;
 const id=button.dataset.markReady,order=partnerOrders.find(item=>item.id===id);
 if(!order)return;
 const type=String(order.orderType||order.deliveryType||order.fulfillmentType||"Delivery").toLowerCase().includes("pickup")?"Pickup":"Delivery";
-if(!confirm("Food ready hai? Delivery Partner ko READY alert bhejein?"))return;
+if(!confirm("Is the food ready? Send a READY alert to the Delivery Partner?"))return;
 button.disabled=true;button.textContent="SAVING...";
 try{
 await updateDoc(doc(db,"orders",id),{status:"Ready",readyAt:serverTimestamp(),handoverType:type,updatedAt:serverTimestamp()});stopOrderAlarm(id);setStatus("Order marked READY. Delivery Partner ko alert bhej diya gaya.");
@@ -1183,9 +1183,9 @@ if(reject){pendingRejectOrderId=reject.dataset.rejectOrder;$("rejectReason").val
 const button=event.target.closest("button[data-order]");if(!button||!currentRestaurantId)return;
 const orderId=button.dataset.order,status=button.dataset.status,order=partnerOrders.find(item=>item.id===orderId);if(!order)return;
 if(status==="Accepted"){pendingAcceptOrderId=orderId;selectedPrepMinutes=estimatePrepMinutes(order);$("prepTimeValue").textContent=String(selectedPrepMinutes);$("prepTimeDialog").classList.add("open");return;}
-if(!confirm("Order status "+status+" karna hai?"))return;
+if(!confirm("Set order status to "+status+"?"))return;
 button.disabled=true;button.textContent="UPDATING...";
-try{const batch=writeBatch(db);const update={status,updatedAt:serverTimestamp()};if(status==="Preparing"){update.preparingAt=serverTimestamp();}batch.update(doc(db,"orders",orderId),update);await batch.commit();setStatus("Order status updated: "+status);button.textContent="✓ "+status.toUpperCase();button.classList.add("confirmed");}catch(error){alert("ORDER ERROR: "+(error.code||"")+" - "+error.message);setStatus("Order update failed: "+error.message);button.disabled=false;button.textContent="START PREPARING";}
+try{const batch=writeBatch(db);const update={status,updatedAt:serverTimestamp()};if(status==="Preparing"){update.preparingAt=serverTimestamp();}batch.update(doc(db,"orders",orderId),update);await batch.commit();setStatus("Set order status to updated: "+status);button.textContent="✓ "+status.toUpperCase();button.classList.add("confirmed");}catch(error){alert("ORDER ERROR: "+(error.code||"")+" - "+error.message);setStatus("Order update failed: "+error.message);button.disabled=false;button.textContent="START PREPARING";}
 });
 $("prepTimeMinus").addEventListener("click",()=>{selectedPrepMinutes=Math.max(5,selectedPrepMinutes-1);$("prepTimeValue").textContent=String(selectedPrepMinutes);});
 $("prepTimePlus").addEventListener("click",()=>{selectedPrepMinutes=Math.min(30,selectedPrepMinutes+1);$("prepTimeValue").textContent=String(selectedPrepMinutes);});
@@ -1205,7 +1205,7 @@ finally{button.disabled=false;button.textContent="CONFIRM & ACCEPT";}
 });
 $("cancelRejectBtn").addEventListener("click",()=>{pendingRejectOrderId=null;$("rejectDialog").classList.remove("open");});
 $("confirmRejectBtn").addEventListener("click",async()=>{
-if(!pendingRejectOrderId||!currentRestaurantId)return;const reason=$("rejectReason").value,note=$("rejectNote").value.trim();if(!reason){alert("Please rejection reason select karein.");return;}if(reason==="Other"&&!note){alert("Other reason ke liye short note likhein.");return;}
+if(!pendingRejectOrderId||!currentRestaurantId)return;const reason=$("rejectReason").value,note=$("rejectNote").value.trim();if(!reason){alert("Please select a rejection reason.");return;}if(reason==="Other"&&!note){alert("Please enter a short note for the Other reason.");return;}
 const id=pendingRejectOrderId,button=$("confirmRejectBtn");button.disabled=true;button.textContent="UPDATING...";
 try{const rejectionReason=reason==="Other"?note:reason+(note?" — "+note:"");await updateDoc(doc(db,"orders",id),{status:"Rejected",rejectionReason,rejectedAt:serverTimestamp(),updatedAt:serverTimestamp()});$("rejectDialog").classList.remove("open");pendingRejectOrderId=null;setStatus("Order rejected. Reason saved: "+reason);}catch(error){alert("REJECTION FAILED: "+(error.code||"")+" - "+error.message);setStatus("Rejection failed: "+error.message);}finally{button.disabled=false;button.textContent="CONFIRM REJECTION";}
 });
