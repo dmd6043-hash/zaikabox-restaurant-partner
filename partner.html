@@ -1079,13 +1079,14 @@ function playZaikaAlarmBeep(){
 try{
 const ctx=window.zaikaAudioContext;if(!ctx||ctx.state!=="running")return;
 const now=ctx.currentTime;
-[0,0.32,0.64].forEach((offset,index)=>{
+[0,0.42,0.84].forEach((offset,index)=>{
 const osc=ctx.createOscillator(),gain=ctx.createGain();
-osc.type="sine";osc.frequency.value=index===1?880:660;
-gain.gain.setValueAtTime(0.0001,now+offset);gain.gain.exponentialRampToValueAtTime(0.22,now+offset+0.025);gain.gain.exponentialRampToValueAtTime(0.0001,now+offset+0.22);
-osc.connect(gain);gain.connect(ctx.destination);osc.start(now+offset);osc.stop(now+offset+0.24);
+osc.type="square";osc.frequency.setValueAtTime(index===1?1040:760,now+offset);
+osc.frequency.exponentialRampToValueAtTime(520,now+offset+0.34);
+gain.gain.setValueAtTime(0.0001,now+offset);gain.gain.exponentialRampToValueAtTime(0.48,now+offset+0.035);gain.gain.setValueAtTime(0.48,now+offset+0.24);gain.gain.exponentialRampToValueAtTime(0.0001,now+offset+0.38);
+osc.connect(gain);gain.connect(ctx.destination);osc.start(now+offset);osc.stop(now+offset+0.4);
 });
-if(navigator.vibrate)navigator.vibrate([250,120,250]);
+if(navigator.vibrate)navigator.vibrate([500,120,500,120,500]);
 }catch(e){}
 }
 function startOrderAlarm(id){
@@ -1101,17 +1102,25 @@ function refreshPrepTimers(){
 document.querySelectorAll("[data-prep-timer]").forEach(el=>{
 const readyAt=Number(el.dataset.readyAt||0);
 if(!readyAt)return;
-const remaining=Math.max(0,Math.ceil((readyAt-Date.now())/1000));
-const mins=Math.floor(remaining/60),secs=remaining%60;
+const remaining=Math.ceil((readyAt-Date.now())/1000);
+const mins=Math.floor(Math.abs(remaining)/60),secs=Math.abs(remaining)%60;
 const id=el.dataset.prepTimer;
 const order=partnerOrders.find(item=>item.id===id);
 const type=String(order?.orderType||order?.deliveryType||order?.fulfillmentType||"Delivery").toLowerCase().includes("pickup")?"PICKUP":"DELIVERY";
 const label=el.querySelector(".prep-timer-label");
-if(label)label.textContent=remaining>0?"PREPARING · "+mins+":"+String(secs).padStart(2,"0")+" LEFT":"TIME UP · CHECK FOOD";
+if(label){
+label.textContent=remaining>0?"PREPARING · "+mins+":"+String(secs).padStart(2,"0")+" LEFT":"⚠ OVERDUE · -"+mins+":"+String(secs).padStart(2,"0");
+label.style.color=remaining>0?"#ffffff":"#ff4b5c";
+label.style.fontWeight="900";
+label.style.textShadow=remaining>0?"none":"0 0 12px rgba(255,45,65,.55)";
+}
+if(remaining<=0){
+el.style.border="2px solid #ff354d";el.style.background="rgba(95,12,24,.24)";
+}
 const small=el.querySelector(".small");
-if(remaining===0){
+if(remaining<=0){
 startOrderAlarm(id);
-small.textContent="TIME COMPLETE! Alarm baj raha hai. Food check karke Ready mark karein.";
+small.textContent="⚠ TIME OVER! "+mins+":"+String(secs).padStart(2,"0")+" late. Food check karke READY dabayein.";
 if(!el.querySelector("[data-mark-ready]")){
 const btn=document.createElement("button");btn.className="success";btn.dataset.markReady=id;btn.textContent="MARK READY FOR "+type;el.appendChild(btn);
 }
@@ -1137,9 +1146,9 @@ const startedAt=zaikaTimestampMs(order.preparingAt)||zaikaTimestampMs(order.acce
 let readyAt=zaikaTimestampMs(order.estimatedReadyAt)||(startedAt?startedAt+eta*60000:0);
 if(!readyAt){window.zaikaPrepDeadlines[order.id]=window.zaikaPrepDeadlines[order.id]||Date.now()+eta*60000;readyAt=window.zaikaPrepDeadlines[order.id];}
 else{window.zaikaPrepDeadlines[order.id]=readyAt;}
-const remaining=Math.max(0,Math.ceil((readyAt-Date.now())/1000));
-const mins=Math.floor(remaining/60),secs=remaining%60;
-const timerText=remaining>0?("PREPARING · "+mins+":"+String(secs).padStart(2,"0")+" LEFT"):"TIME UP · CHECK FOOD";
+const remaining=Math.ceil((readyAt-Date.now())/1000);
+const mins=Math.floor(Math.abs(remaining)/60),secs=Math.abs(remaining)%60;
+const timerText=remaining>0?("PREPARING · "+mins+":"+String(secs).padStart(2,"0")+" LEFT"):("⚠ OVERDUE · -"+mins+":"+String(secs).padStart(2,"0"));
 actions='<div class="prep-timer" data-prep-timer="'+safe(order.id)+'" data-ready-at="'+safe(readyAt)+'"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:130px"><div class="prep-timer-label">'+timerText+'</div><div class="small">Estimated preparation time: '+safe(eta)+' minutes</div></div><button class="success" style="width:auto;min-width:112px;margin:0;flex:0 0 auto" data-mark-ready="'+safe(order.id)+'">✓ READY</button></div><div class="small" style="margin-top:8px">Food check karke READY dabayein.</div></div>';
 }
 else if(normalized==="ready")actions='<div class="order-actions"><button class="success" disabled>✓ READY FOR '+(orderType.toLowerCase().includes("pickup")?"PICKUP":"DELIVERY")+'</button></div>';
