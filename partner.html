@@ -134,6 +134,17 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 .rejection-modal button{width:100%;min-height:48px;margin:8px 0 0}
 
 
+/* Preparation time selector modal */
+.prep-time-dialog{position:fixed;inset:0;z-index:9100;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.86);backdrop-filter:blur(8px)}
+.prep-time-dialog.open{display:flex;animation:cardIn .2s ease}
+.prep-time-modal{width:100%;max-width:420px;padding:22px 20px;border:1px solid #a66a28;border-radius:20px;background:linear-gradient(145deg,#21180d,#09090c);box-shadow:0 24px 70px #000c;text-align:center}
+.prep-time-modal h3{margin:0 0 8px;color:#ffb44e}
+.prep-time-stepper{display:flex;align-items:center;justify-content:center;gap:28px;margin:22px 0}
+.prep-time-stepper button{width:58px;height:58px;margin:0;padding:0;border-radius:16px;font-size:30px;line-height:1}
+.prep-time-stepper strong{min-width:90px;font-size:42px;color:#fff;font-variant-numeric:tabular-nums}
+.prep-time-stepper small{display:block;font-size:10px;letter-spacing:1.5px;color:#ffb44e}
+.prep-time-actions{display:flex;gap:10px;margin-top:18px}
+.prep-time-actions button{flex:1;margin:0;min-height:46px}
 /* Centered rejection-reason modal */
 #rejectDialog.reject-panel{position:fixed;inset:0;z-index:9000;display:none;align-items:center;justify-content:center;box-sizing:border-box;width:100%;height:100%;max-width:none;margin:0;padding:22px;background:rgba(0,0,0,.84);backdrop-filter:blur(8px);border:0;border-radius:0}
 #rejectDialog.reject-panel.open{display:flex;animation:cardIn .2s ease}
@@ -344,7 +355,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 <button class="order-tab" type="button" data-order-filter="Preparing">Preparing</button><button class="order-tab" type="button" data-order-filter="Ready">Ready</button>
 <button class="order-tab" type="button" data-order-filter="All">All Orders</button>
 </div>
-<div id="ordersList">Orders loading...</div><div id="rejectDialog" class="reject-panel" role="dialog" aria-label="Reject order reason"><h3>Reject Order</h3><p class="small">Customer ko genuine reason select karke batayein.</p><label for="rejectReason">Reason</label><select id="rejectReason"><option value="">Select reason</option><option>Item out of stock</option><option>Restaurant is currently full / high order volume</option><option>Restaurant is near closing time</option><option>Temporary kitchen/equipment issue</option><option>Delivery/pickup service unavailable</option><option>Other</option></select><label for="rejectNote">Extra note (optional)</label><textarea id="rejectNote" rows="2" maxlength="180" placeholder="Short explanation"></textarea><div class="reject-actions"><button type="button" class="secondary" id="cancelRejectBtn">CANCEL</button><button type="button" class="danger" id="confirmRejectBtn">CONFIRM REJECTION</button></div></div>
+<div id="ordersList">Orders loading...</div><div id="prepTimeDialog" class="prep-time-dialog" role="dialog" aria-modal="true" aria-label="Set preparation time"><div class="prep-time-modal"><h3>Set Preparation Time</h3><p class="small">Order accept karne se pehle food ready hone ka estimated time set karein.</p><div class="prep-time-stepper"><button type="button" id="prepTimeMinus" aria-label="Decrease preparation time">−</button><strong><span id="prepTimeValue">15</span><small>MINUTES</small></strong><button type="button" id="prepTimePlus" aria-label="Increase preparation time">+</button></div><p class="small">Minimum 5 minutes · Maximum 30 minutes</p><div class="prep-time-actions"><button type="button" class="secondary" id="cancelPrepTime">CANCEL</button><button type="button" class="success" id="confirmAcceptOrder">CONFIRM & ACCEPT</button></div></div></div><div id="rejectDialog" class="reject-panel" role="dialog" aria-label="Reject order reason"><h3>Reject Order</h3><p class="small">Customer ko genuine reason select karke batayein.</p><label for="rejectReason">Reason</label><select id="rejectReason"><option value="">Select reason</option><option>Item out of stock</option><option>Restaurant is currently full / high order volume</option><option>Restaurant is near closing time</option><option>Temporary kitchen/equipment issue</option><option>Delivery/pickup service unavailable</option><option>Other</option></select><label for="rejectNote">Extra note (optional)</label><textarea id="rejectNote" rows="2" maxlength="180" placeholder="Short explanation"></textarea><div class="reject-actions"><button type="button" class="secondary" id="cancelRejectBtn">CANCEL</button><button type="button" class="danger" id="confirmRejectBtn">CONFIRM REJECTION</button></div></div>
 </div>
 </section>
 
@@ -411,7 +422,7 @@ let loginInProgress=false;
 let partnerMenuItems=[];
 let partnerOrders=[];
 let currentOrderFilter="New";
-let pendingRejectOrderId=null;
+let pendingRejectOrderId=null;\nlet pendingAcceptOrderId=null;\nlet selectedPrepMinutes=15;
 let currentStockFilter="available";
 let ordersUnsubscribe=null;
 
@@ -1087,9 +1098,25 @@ const reject=event.target.closest("[data-reject-order]");
 if(reject){pendingRejectOrderId=reject.dataset.rejectOrder;$("rejectReason").value="";$("rejectNote").value="";$("rejectDialog").classList.add("open");$("rejectDialog").scrollIntoView({behavior:"smooth",block:"center"});return;}
 const button=event.target.closest("button[data-order]");if(!button||!currentRestaurantId)return;
 const orderId=button.dataset.order,status=button.dataset.status,order=partnerOrders.find(item=>item.id===orderId);if(!order)return;
+if(status==="Accepted"){pendingAcceptOrderId=orderId;selectedPrepMinutes=estimatePrepMinutes(order);$("prepTimeValue").textContent=String(selectedPrepMinutes);$("prepTimeDialog").classList.add("open");return;}
 if(!confirm("Order status "+status+" karna hai?"))return;
 button.disabled=true;button.textContent="UPDATING...";
-try{const batch=writeBatch(db);const update={status,updatedAt:serverTimestamp()};if(status==="Accepted"){const duration=estimatePrepMinutes(order);update.acceptedAt=serverTimestamp();update.status="Preparing";update.preparingAt=serverTimestamp();update.prepDurationMinutes=duration;update.estimatedReadyAt=new Date(Date.now()+duration*60000);}if(status==="Preparing"){update.preparingAt=serverTimestamp();}batch.update(doc(db,"orders",orderId),update);await batch.commit();setStatus(status==="Accepted"?"Order accepted. Preparation timer started.":"Order status updated: "+status);button.textContent=status==="Accepted"?"✓ PREPARING":"✓ "+status.toUpperCase();button.classList.add("confirmed");}catch(error){alert("ORDER ERROR: "+(error.code||"")+" - "+error.message);setStatus("Order update failed: "+error.message);button.disabled=false;button.textContent=status==="Accepted"?"ACCEPT ORDER":"START PREPARING";}
+try{const batch=writeBatch(db);const update={status,updatedAt:serverTimestamp()};if(status==="Preparing"){update.preparingAt=serverTimestamp();}batch.update(doc(db,"orders",orderId),update);await batch.commit();setStatus("Order status updated: "+status);button.textContent="✓ "+status.toUpperCase();button.classList.add("confirmed");}catch(error){alert("ORDER ERROR: "+(error.code||"")+" - "+error.message);setStatus("Order update failed: "+error.message);button.disabled=false;button.textContent="START PREPARING";}
+});
+$("prepTimeMinus").addEventListener("click",()=>{selectedPrepMinutes=Math.max(5,selectedPrepMinutes-5);$("prepTimeValue").textContent=String(selectedPrepMinutes);});
+$("prepTimePlus").addEventListener("click",()=>{selectedPrepMinutes=Math.min(30,selectedPrepMinutes+5);$("prepTimeValue").textContent=String(selectedPrepMinutes);});
+$("cancelPrepTime").addEventListener("click",()=>{pendingAcceptOrderId=null;$("prepTimeDialog").classList.remove("open");});
+$("confirmAcceptOrder").addEventListener("click",async()=>{
+if(!pendingAcceptOrderId||!currentRestaurantId)return;
+const id=pendingAcceptOrderId,button=$("confirmAcceptOrder"),orderButton=$('ordersList').querySelector('button[data-order="'+CSS.escape(id)+'"]');
+button.disabled=true;button.textContent="ACCEPTING...";
+if(orderButton){orderButton.disabled=true;orderButton.textContent="UPDATING...";}
+try{
+const duration=Math.min(30,Math.max(5,Number(selectedPrepMinutes)||15));
+await updateDoc(doc(db,"orders",id),{status:"Preparing",acceptedAt:serverTimestamp(),preparingAt:serverTimestamp(),prepDurationMinutes:duration,estimatedReadyAt:new Date(Date.now()+duration*60000),updatedAt:serverTimestamp()});
+$("prepTimeDialog").classList.remove("open");pendingAcceptOrderId=null;setStatus("Order accepted. Preparation time set to "+duration+" minutes.");await loadOrders();
+}catch(error){alert("ORDER ACCEPT FAILED: "+(error.code||"")+" - "+error.message);setStatus("Order accept failed: "+error.message);if(orderButton){orderButton.disabled=false;orderButton.textContent="ACCEPT ORDER";}}
+finally{button.disabled=false;button.textContent="CONFIRM & ACCEPT";}
 });
 $("cancelRejectBtn").addEventListener("click",()=>{pendingRejectOrderId=null;$("rejectDialog").classList.remove("open");});
 $("confirmRejectBtn").addEventListener("click",async()=>{
