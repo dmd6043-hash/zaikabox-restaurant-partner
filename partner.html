@@ -1028,6 +1028,33 @@ const quantity=items.reduce((sum,item)=>sum+Number(item.quantity||item.qty||1),0
 if(quantity>=6)duration+=5;
 return Math.min(30,Math.max(5,duration));
 }
+// PREPARATION TIMER COMPLETION ALARM
+window.zaikaAlarmIntervals=window.zaikaAlarmIntervals||{};
+function unlockZaikaAlarm(){
+try{const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx)return;if(!window.zaikaAudioContext)window.zaikaAudioContext=new AudioCtx();if(window.zaikaAudioContext.state==="suspended")window.zaikaAudioContext.resume();}catch(e){}
+}
+function playZaikaAlarmBeep(){
+try{
+const ctx=window.zaikaAudioContext;if(!ctx||ctx.state!=="running")return;
+const now=ctx.currentTime;
+[0,0.32,0.64].forEach((offset,index)=>{
+const osc=ctx.createOscillator(),gain=ctx.createGain();
+osc.type="sine";osc.frequency.value=index===1?880:660;
+gain.gain.setValueAtTime(0.0001,now+offset);gain.gain.exponentialRampToValueAtTime(0.22,now+offset+0.025);gain.gain.exponentialRampToValueAtTime(0.0001,now+offset+0.22);
+osc.connect(gain);gain.connect(ctx.destination);osc.start(now+offset);osc.stop(now+offset+0.24);
+});
+if(navigator.vibrate)navigator.vibrate([250,120,250]);
+}catch(e){}
+}
+function startOrderAlarm(id){
+if(window.zaikaAlarmIntervals[id])return;
+playZaikaAlarmBeep();
+window.zaikaAlarmIntervals[id]=setInterval(playZaikaAlarmBeep,2200);
+}
+function stopOrderAlarm(id){
+if(window.zaikaAlarmIntervals[id]){clearInterval(window.zaikaAlarmIntervals[id]);delete window.zaikaAlarmIntervals[id];}
+}
+document.addEventListener("pointerdown",unlockZaikaAlarm,{passive:true});
 function refreshPrepTimers(){
 document.querySelectorAll("[data-prep-timer]").forEach(el=>{
 const readyAt=Number(el.dataset.readyAt||0);
@@ -1041,7 +1068,8 @@ const type=String(order.orderType||order.deliveryType||order.fulfillmentType||"D
 el.querySelector(".prep-timer-label").textContent=remaining>0?"PREPARING · "+mins+":"+String(secs).padStart(2,"0")+" LEFT":"TIME UP · CHECK FOOD";
 const small=el.querySelector(".small");
 if(remaining===0){
-small.textContent="Food check karne ke baad Ready mark karein.";
+startOrderAlarm(id);
+small.textContent="TIME COMPLETE! Alarm baj raha hai. Food check karke Ready mark karein.";
 if(!el.querySelector("[data-mark-ready]")){
 const btn=document.createElement("button");btn.className="success";btn.dataset.markReady=id;btn.textContent="MARK READY FOR "+type;el.appendChild(btn);
 }
@@ -1089,7 +1117,7 @@ const type=String(order.orderType||order.deliveryType||order.fulfillmentType||"D
 if(!confirm("Food ready check kar liya? "+type+" handover ke liye ready mark karein?"))return;
 button.disabled=true;button.textContent="UPDATING...";
 try{
-await updateDoc(doc(db,"orders",id),{status:"Ready",readyAt:serverTimestamp(),handoverType:type,updatedAt:serverTimestamp()});setStatus("Order marked Ready for "+type+".");
+await updateDoc(doc(db,"orders",id),{status:"Ready",readyAt:serverTimestamp(),handoverType:type,updatedAt:serverTimestamp()});stopOrderAlarm(id);setStatus("Order marked Ready for "+type+".");
 }catch(error){alert("READY UPDATE FAILED: "+error.message);button.disabled=false;button.textContent="MARK READY FOR "+type.toUpperCase();}
 });
 // ACCEPT / REJECT ORDER ACTIONS
@@ -1113,6 +1141,7 @@ button.disabled=true;button.textContent="ACCEPTING...";
 if(orderButton){orderButton.disabled=true;orderButton.textContent="UPDATING...";}
 try{
 const duration=Math.min(30,Math.max(5,Number(selectedPrepMinutes)||15));
+unlockZaikaAlarm();
 await updateDoc(doc(db,"orders",id),{status:"Preparing",acceptedAt:serverTimestamp(),preparingAt:serverTimestamp(),prepDurationMinutes:duration,estimatedReadyAt:new Date(Date.now()+duration*60000),updatedAt:serverTimestamp()});
 $("prepTimeDialog").classList.remove("open");pendingAcceptOrderId=null;const acceptedOrder=partnerOrders.find(item=>item.id===id);if(acceptedOrder){acceptedOrder.status="Preparing";acceptedOrder.prepDurationMinutes=duration;acceptedOrder.estimatedReadyAt={toMillis:()=>Date.now()+duration*60000};}updateIncomingOrderCount();renderOrders();setStatus("Order accepted. Preparation time set to "+duration+" minutes.");
 }catch(error){alert("ORDER ACCEPT FAILED: "+(error.code||"")+" - "+error.message);setStatus("Order accept failed: "+error.message);if(orderButton){orderButton.disabled=false;orderButton.textContent="ACCEPT ORDER";}}
