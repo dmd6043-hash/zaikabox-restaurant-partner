@@ -1146,7 +1146,7 @@ try{
 const duration=Math.min(30,Math.max(5,Number(selectedPrepMinutes)||15));
 unlockZaikaAlarm();
 await updateDoc(doc(db,"orders",id),{status:"Preparing",acceptedAt:serverTimestamp(),preparingAt:serverTimestamp(),prepDurationMinutes:duration,estimatedReadyAt:new Date(Date.now()+duration*60000),updatedAt:serverTimestamp()});
-$("prepTimeDialog").classList.remove("open");pendingAcceptOrderId=null;const acceptedOrder=partnerOrders.find(item=>item.id===id);if(acceptedOrder){acceptedOrder.status="Preparing";acceptedOrder.prepDurationMinutes=duration;acceptedOrder.estimatedReadyAt={toMillis:()=>Date.now()+duration*60000};}updateIncomingOrderCount();renderOrders();setStatus("Order accepted. Preparation time set to "+duration+" minutes.");
+$("prepTimeDialog").classList.remove("open");pendingAcceptOrderId=null;const acceptedOrder=partnerOrders.find(item=>item.id===id);if(acceptedOrder){acceptedOrder.status="Preparing";acceptedOrder.prepDurationMinutes=duration;const readyAtMs=Date.now()+duration*60000;acceptedOrder.estimatedReadyAt={toMillis:()=>readyAtMs};}updateIncomingOrderCount();renderOrders();setStatus("Order accepted. Preparation time set to "+duration+" minutes.");
 }catch(error){alert("ORDER ACCEPT FAILED: "+(error.code||"")+" - "+error.message);setStatus("Order accept failed: "+error.message);if(orderButton){orderButton.disabled=false;orderButton.textContent="ACCEPT ORDER";}}
 finally{button.disabled=false;button.textContent="CONFIRM & ACCEPT";}
 });
