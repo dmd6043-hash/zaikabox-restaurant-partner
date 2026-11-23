@@ -125,7 +125,15 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 
 .registration-link{background:transparent;border:1px solid #64401f;color:#ffb24a;width:100%;margin-top:10px}
 
-\n#errorLogoutBtn{display:block;width:auto;min-height:30px;margin:8px auto 0;padding:6px 12px;font-size:10px;letter-spacing:.5px;border-radius:9px;box-shadow:none}\n</style>
+\n#errorLogoutBtn{display:block;width:auto;min-height:30px;margin:8px auto 0;padding:6px 12px;font-size:10px;letter-spacing:.5px;border-radius:9px;box-shadow:none}\n
+#rejectionPopup{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.82);backdrop-filter:blur(8px)}
+#rejectionPopup.open{display:flex;animation:cardIn .22s ease}
+.rejection-modal{width:100%;max-width:440px;padding:24px 20px;border:1px solid #a63d50;border-radius:22px;background:linear-gradient(145deg,#211016,#09090c);box-shadow:0 24px 70px #000c}
+.rejection-modal h2{color:#ff8292;margin:0 0 8px}
+.rejection-modal .reason{margin:16px 0;padding:15px;border:1px solid #713342;border-radius:14px;background:#160c11;color:#fff;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+.rejection-modal button{width:100%;min-height:48px;margin:8px 0 0}
+
+</style>
 </head>
 
 <body>
@@ -228,6 +236,17 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
     <button class="primary" id="resubmitCorrectionBtn" type="submit" style="width:100%">SAVE &amp; RESUBMIT FOR APPROVAL</button>
     <button class="secondary" id="correctionLogoutBtn" type="button" style="width:100%">LOGOUT</button>
   </form>
+</div>
+
+<div id="rejectionPopup" role="dialog" aria-modal="true" aria-labelledby="rejectionTitle">
+  <div class="rejection-modal">
+    <div class="eyebrow">ZAIKABOX APPLICATION UPDATE</div>
+    <h2 id="rejectionTitle">✕ Application Rejected</h2>
+    <p class="small">Super Admin ne aapki restaurant registration reject ki hai.</p>
+    <div class="reason" id="rejectionReasonPopupText">Rejection reason available nahi hai. ZaikaBox support se sampark karein.</div>
+    <p class="small">Agar aapko lagta hai ki ye decision galat hai, toh ZaikaBox support se sampark karein.</p>
+    <button class="primary" id="rejectionPopupCloseBtn" type="button">OK, CLOSE</button>
+  </div>
 </div>
 
 <div id="registrationSuccess" class="registration-success" role="status" aria-live="polite">
@@ -632,6 +651,12 @@ function showCorrectionApplication(application){
   setStatus("Correction Required: Details edit karein aur dobara submit karein.");
 }
 $("correctionLogoutBtn").addEventListener("click",logoutPartner);
+$("rejectionPopupCloseBtn").addEventListener("click",async()=>{
+  $("rejectionPopup").classList.remove("open");
+  await signOut(auth);
+  $("loginBox").classList.remove("hidden");
+  setStatus("Application rejected. Support se sampark karein.");
+});
 $("correctionForm").addEventListener("submit",async event=>{
   event.preventDefault();
   const user=auth.currentUser;
@@ -776,6 +801,13 @@ if(!accountSnapshot.exists()){
     const appStatus=application.status||"Pending Approval";
     if(appStatus==="Correction Required"){
       showCorrectionApplication(application);
+      return;
+    }
+    if(["rejected","application rejected"].includes(String(appStatus).trim().toLowerCase())){
+      $("loginBox").classList.add("hidden");
+      $("rejectionReasonPopupText").textContent=application.rejectionReason||application.rejectReason||application.reason||"Rejection reason available nahi hai. ZaikaBox support se sampark karein.";
+      $("rejectionPopup").classList.add("open");
+      setStatus("Application rejected. Rejection reason popup mein dekhein.");
       return;
     }
     await signOut(auth);
