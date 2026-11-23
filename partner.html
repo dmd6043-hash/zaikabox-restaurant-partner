@@ -1032,6 +1032,14 @@ if(quantity>=6)duration+=5;
 return Math.min(30,Math.max(5,duration));
 }
 // PREPARATION TIMER COMPLETION ALARM
+function zaikaTimestampMs(value){
+if(!value)return 0;
+if(typeof value.toMillis==="function")return value.toMillis();
+if(typeof value.seconds==="number")return value.seconds*1000;
+if(value instanceof Date)return value.getTime();
+const n=Number(value);return Number.isFinite(n)?n:0;
+}
+window.zaikaPrepDeadlines=window.zaikaPrepDeadlines||{};
 window.zaikaAlarmIntervals=window.zaikaAlarmIntervals||{};
 function unlockZaikaAlarm(){
 try{const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx)return;if(!window.zaikaAudioContext)window.zaikaAudioContext=new AudioCtx();if(window.zaikaAudioContext.state==="suspended")window.zaikaAudioContext.resume();}catch(e){}
@@ -1066,9 +1074,9 @@ const remaining=Math.max(0,Math.ceil((readyAt-Date.now())/1000));
 const mins=Math.floor(remaining/60),secs=remaining%60;
 const id=el.dataset.prepTimer;
 const order=partnerOrders.find(item=>item.id===id);
-if(!order)return;
-const type=String(order.orderType||order.deliveryType||order.fulfillmentType||"Delivery").toLowerCase().includes("pickup")?"PICKUP":"DELIVERY";
-el.querySelector(".prep-timer-label").textContent=remaining>0?"PREPARING · "+mins+":"+String(secs).padStart(2,"0")+" LEFT":"TIME UP · CHECK FOOD";
+const type=String(order?.orderType||order?.deliveryType||order?.fulfillmentType||"Delivery").toLowerCase().includes("pickup")?"PICKUP":"DELIVERY";
+const label=el.querySelector(".prep-timer-label");
+if(label)label.textContent=remaining>0?"PREPARING · "+mins+":"+String(secs).padStart(2,"0")+" LEFT":"TIME UP · CHECK FOOD";
 const small=el.querySelector(".small");
 if(remaining===0){
 startOrderAlarm(id);
@@ -1092,8 +1100,11 @@ const date=order.createdAt?.toDate?order.createdAt.toDate().toLocaleString("en-I
 if(isNew)actions='<div class="order-actions"><button class="success" data-order="'+safe(order.id)+'" data-status="Accepted">ACCEPT ORDER</button><button class="danger" data-reject-order="'+safe(order.id)+'">REJECT ORDER</button></div>';
 else if(normalized==="accepted"||normalized==="preparing"){
 const eta=Number(order.prepDurationMinutes||15);
-const readyAt=order.estimatedReadyAt?.toMillis?order.estimatedReadyAt.toMillis():(order.estimatedReadyAt?.seconds?order.estimatedReadyAt.seconds*1000:0);
-const remaining=readyAt?Math.max(0,Math.ceil((readyAt-Date.now())/1000)):eta*60;
+const startedAt=zaikaTimestampMs(order.preparingAt)||zaikaTimestampMs(order.acceptedAt)||zaikaTimestampMs(order.updatedAt);
+let readyAt=zaikaTimestampMs(order.estimatedReadyAt)||(startedAt?startedAt+eta*60000:0);
+if(!readyAt){window.zaikaPrepDeadlines[order.id]=window.zaikaPrepDeadlines[order.id]||Date.now()+eta*60000;readyAt=window.zaikaPrepDeadlines[order.id];}
+else{window.zaikaPrepDeadlines[order.id]=readyAt;}
+const remaining=Math.max(0,Math.ceil((readyAt-Date.now())/1000));
 const mins=Math.floor(remaining/60),secs=remaining%60;
 const timerText=remaining>0?("PREPARING · "+mins+":"+String(secs).padStart(2,"0")+" LEFT"):"TIME UP · CHECK FOOD";
 actions='<div class="prep-timer" data-prep-timer="'+safe(order.id)+'" data-ready-at="'+safe(readyAt)+'"><div class="prep-timer-label">'+timerText+'</div><div class="small">Estimated preparation time: '+safe(eta)+' minutes</div>'+(remaining===0?'<button class="success" data-mark-ready="'+safe(order.id)+'">MARK READY FOR '+(orderType.toLowerCase().includes("pickup")?"PICKUP":"DELIVERY")+'</button>':'<div class="small">Timer complete hone par food check karke ready mark karein.</div>')+'</div>';
