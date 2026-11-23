@@ -1140,7 +1140,7 @@ else{window.zaikaPrepDeadlines[order.id]=readyAt;}
 const remaining=Math.max(0,Math.ceil((readyAt-Date.now())/1000));
 const mins=Math.floor(remaining/60),secs=remaining%60;
 const timerText=remaining>0?("PREPARING · "+mins+":"+String(secs).padStart(2,"0")+" LEFT"):"TIME UP · CHECK FOOD";
-actions='<div class="prep-timer" data-prep-timer="'+safe(order.id)+'" data-ready-at="'+safe(readyAt)+'"><div class="prep-timer-label">'+timerText+'</div><div class="small">Estimated preparation time: '+safe(eta)+' minutes</div>'+(remaining===0?'<button class="success" data-mark-ready="'+safe(order.id)+'">MARK READY FOR '+(orderType.toLowerCase().includes("pickup")?"PICKUP":"DELIVERY")+'</button>':'<div class="small">Timer complete hone par food check karke ready mark karein.</div>')+'</div>';
+actions='<div class="prep-timer" data-prep-timer="'+safe(order.id)+'" data-ready-at="'+safe(readyAt)+'"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:130px"><div class="prep-timer-label">'+timerText+'</div><div class="small">Estimated preparation time: '+safe(eta)+' minutes</div></div><button class="success" style="width:auto;min-width:112px;margin:0;flex:0 0 auto" data-mark-ready="'+safe(order.id)+'">✓ READY</button></div><div class="small" style="margin-top:8px">Food check karke READY dabayein.</div></div>';
 }
 else if(normalized==="ready")actions='<div class="order-actions"><button class="success" disabled>✓ READY FOR '+(orderType.toLowerCase().includes("pickup")?"PICKUP":"DELIVERY")+'</button></div>';
 else if(normalized==="rejected")actions='<div class="small">Rejected reason: '+safe(order.rejectionReason||"Not recorded")+'</div>';
@@ -1161,10 +1161,10 @@ if(!button||!currentRestaurantId)return;
 const id=button.dataset.markReady,order=partnerOrders.find(item=>item.id===id);
 if(!order)return;
 const type=String(order.orderType||order.deliveryType||order.fulfillmentType||"Delivery").toLowerCase().includes("pickup")?"Pickup":"Delivery";
-if(!confirm("Food ready check kar liya? "+type+" handover ke liye ready mark karein?"))return;
-button.disabled=true;button.textContent="UPDATING...";
+if(!confirm("Food ready hai? Delivery Partner ko READY alert bhejein?"))return;
+button.disabled=true;button.textContent="SAVING...";
 try{
-await updateDoc(doc(db,"orders",id),{status:"Ready",readyAt:serverTimestamp(),handoverType:type,updatedAt:serverTimestamp()});stopOrderAlarm(id);setStatus("Order marked Ready for "+type+".");
+await updateDoc(doc(db,"orders",id),{status:"Ready",readyAt:serverTimestamp(),handoverType:type,updatedAt:serverTimestamp()});stopOrderAlarm(id);setStatus("Order marked READY. Delivery Partner ko alert bhej diya gaya.");
 }catch(error){alert("READY UPDATE FAILED: "+error.message);button.disabled=false;button.textContent="MARK READY FOR "+type.toUpperCase();}
 });
 // ACCEPT / REJECT ORDER ACTIONS
