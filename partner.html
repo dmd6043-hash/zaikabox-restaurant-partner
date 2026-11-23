@@ -288,6 +288,8 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 <div class="eyebrow">YOUR RESTAURANT SPACE</div>
 <h2>Welcome back </h2>
 <p id="partnerMessage">Your restaurant workspace is ready. Manage orders and menu from here.</p>
+<div class="row" style="margin-top:18px;justify-content:flex-start;gap:10px"><span id="restaurantOnlineBadge" class="tag">● ONLINE</span><button class="danger" id="toggleRestaurantOnline" type="button" style="margin:0">GO OFFLINE</button></div>
+<p class="small" id="restaurantOnlineHelp" style="margin-top:9px">Online hone par customers aapke restaurant ko order ke liye dekh sakte hain.</p>
 </div>
 <div class="stats">
 <div class="stat"><strong>LIVE</strong><span>Order connection</span></div>
@@ -417,6 +419,7 @@ const $=id=>document.getElementById(id);
 
 let currentRestaurantId=null;
 let currentRestaurantName="Restaurant";
+let isRestaurantOnline=true;
 let authVersion=0;
 let loginInProgress=false;
 let partnerMenuItems=[];
@@ -452,6 +455,32 @@ const shortcut=event.target.closest("[data-goto]");
 if(shortcut)showPartnerPage(shortcut.dataset.goto);
 });
 $("profileLogoutBtn").addEventListener("click",logoutPartner);
+
+function renderRestaurantOnlineStatus(){
+const badge=$("restaurantOnlineBadge"),button=$("toggleRestaurantOnline"),help=$("restaurantOnlineHelp");
+if(!badge||!button)return;
+badge.textContent=isRestaurantOnline?"● ONLINE":"● OFFLINE";
+badge.style.background=isRestaurantOnline?"#103b2b":"#35151b";
+badge.style.color=isRestaurantOnline?"#75e7b5":"#ff8796";
+badge.style.borderColor=isRestaurantOnline?"#267c5a":"#8e3444";
+button.textContent=isRestaurantOnline?"GO OFFLINE":"GO ONLINE";
+button.className=isRestaurantOnline?"danger":"success";
+help.textContent=isRestaurantOnline?"Restaurant online hai. Customers order place kar sakte hain.":"Restaurant offline hai. Naye orders temporarily band rahenge.";
+}
+$("toggleRestaurantOnline").addEventListener("click",async()=>{
+if(!currentRestaurantId)return;
+const button=$("toggleRestaurantOnline"),next=!isRestaurantOnline;
+button.disabled=true;button.textContent="UPDATING...";
+try{
+await updateDoc(doc(db,"restaurants",currentRestaurantId),{isAcceptingOrders:next,isOnline:next,onlineStatusUpdatedAt:serverTimestamp()});
+ isRestaurantOnline=next;renderRestaurantOnlineStatus();
+setStatus(next?"Restaurant is now ONLINE.":"Restaurant is now OFFLINE.");
+}catch(error){
+console.error("RESTAURANT ONLINE STATUS ERROR:",error);
+alert("Online/Offline status update nahi hua: "+error.message);
+renderRestaurantOnlineStatus();
+}finally{button.disabled=false;}
+});
 
 function safe(value){
 return String(value??"").replace(/[&<>"']/g,char=>({
@@ -844,6 +873,8 @@ const restaurant=restaurantSnapshot.data();
 if(restaurant.active===false)throw new Error("Restaurant inactive hai.");
 
 currentRestaurantName=restaurant.name||"Restaurant";
+isRestaurantOnline=restaurant.isAcceptingOrders!==false && restaurant.isOnline!==false;
+renderRestaurantOnlineStatus();
 $("restaurantName").textContent=currentRestaurantName;
 $("profileRestaurantName").textContent=currentRestaurantName;
 $("profilePartnerEmail").textContent="Partner email: "+(user.email||"");
@@ -1087,7 +1118,9 @@ const btn=document.createElement("button");btn.className="success";btn.dataset.m
 }
 });
 }
-if(!window.zaikaPrepTimer){window.zaikaPrepTimer=setInterval(refreshPrepTimers,1000);}
+if(!window.zaikaPrepTimer){window.zaikaPrepTimer=setInterval(()=>{refreshPrepTimers();},1000);}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)refreshPrepTimers();});
+window.addEventListener("focus",refreshPrepTimers);
 function renderOrders(){
 const countStatus=status=>partnerOrders.filter(order=>String(order.status||"New").toLowerCase()===status.toLowerCase()).length;
 $("ordersWaitingCount").textContent=String(countStatus("New"));$("tabNewCount").textContent=String(countStatus("New"));
@@ -1157,7 +1190,7 @@ try{
 const duration=Math.min(30,Math.max(5,Number(selectedPrepMinutes)||15));
 unlockZaikaAlarm();
 await updateDoc(doc(db,"orders",id),{status:"Preparing",acceptedAt:serverTimestamp(),preparingAt:serverTimestamp(),prepDurationMinutes:duration,estimatedReadyAt:new Date(Date.now()+duration*60000),updatedAt:serverTimestamp()});
-$("prepTimeDialog").classList.remove("open");pendingAcceptOrderId=null;const acceptedOrder=partnerOrders.find(item=>item.id===id);if(acceptedOrder){acceptedOrder.status="Preparing";acceptedOrder.prepDurationMinutes=duration;const readyAtMs=Date.now()+duration*60000;acceptedOrder.estimatedReadyAt={toMillis:()=>readyAtMs};}updateIncomingOrderCount();renderOrders();setStatus("Order accepted. Preparation time set to "+duration+" minutes.");
+$("prepTimeDialog").classList.remove("open");pendingAcceptOrderId=null;const acceptedOrder=partnerOrders.find(item=>item.id===id);if(acceptedOrder){acceptedOrder.status="Preparing";acceptedOrder.prepDurationMinutes=duration;const readyAtMs=Date.now()+duration*60000;window.zaikaPrepDeadlines[id]=readyAtMs;acceptedOrder.estimatedReadyAt={toMillis:()=>readyAtMs};}updateIncomingOrderCount();renderOrders();setStatus("Order accepted. Preparation time set to "+duration+" minutes.");
 }catch(error){alert("ORDER ACCEPT FAILED: "+(error.code||"")+" - "+error.message);setStatus("Order accept failed: "+error.message);if(orderButton){orderButton.disabled=false;orderButton.textContent="ACCEPT ORDER";}}
 finally{button.disabled=false;button.textContent="CONFIRM & ACCEPT";}
 });
