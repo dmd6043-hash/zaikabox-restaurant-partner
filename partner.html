@@ -913,7 +913,7 @@ const snapshot=await getDocs(menuCollection());
 partnerMenuItems=snapshot.docs.map(item=>({id:item.id,...item.data()}));
 partnerMenuItems.sort((a,b)=>String(a.name||"").localeCompare(String(b.name||"")));
 if(!partnerMenuItems.length){$("menuList").innerHTML='<p class="small">There are no menu items yet.</p>';$("stockList").innerHTML='<div class="stock-empty">No menu items yet.</div>';return;}
-$("menuList").innerHTML=partnerMenuItems.map(item=>{const available=item.available??true;return '<div class="item"><div class="row"><h3>'+safe(item.name||"Food Item")+'</h3><span class="tag">'+(available?"AVAILABLE":"OUT OF STOCK")+'</span></div><p>Price: <b>₹'+safe(item.price??0)+'</b></p><p class="small">Category: '+safe(item.category||"Other")+'</p><p class="small">'+safe(item.description||"")+'</p><button class="primary" data-action="edit" data-id="'+safe(item.id)+'">EDIT</button><button class="'+(available?"danger":"success")+'" data-action="toggle" data-id="'+safe(item.id)+'">'+(available?"MARK OUT OF STOCK":"MARK AVAILABLE")+'</button><button class="danger" data-action="delete" data-id="'+safe(item.id)+'">DELETE</button></div>';}).join("");
+$("menuList").innerHTML=partnerMenuItems.map(item=>{const available=item.available??true;const variants=Array.isArray(item.variants)?item.variants.map(v=>safe(v.name)+" ₹"+safe(v.price)).join(" · "):"";return '<div class="item"><div style="display:flex;gap:12px;align-items:center">'+(item.imageUrl?'<img src="'+safe(item.imageUrl)+'" alt="" style="width:66px;height:66px;object-fit:cover;border-radius:12px">':'<div style="width:66px;height:66px;border-radius:12px;background:#252525;display:grid;place-items:center">🍽️</div>')+'<div style="flex:1"><div class="row"><h3>'+safe(item.name||"Food Item")+'</h3><span class="tag">'+(available?"IN STOCK":"OUT OF STOCK")+'</span></div><p>₹'+safe(item.price??0)+' · '+safe(item.foodType||"Veg")+' · '+safe(item.category||"Other")+'</p></div></div><p class="small">'+safe(item.description||"")+'</p>'+(variants?'<p class="small">Variants: '+variants+'</p>':'')+(item.gstApplicable?'<p class="small">GST: '+safe(item.gstRate||0)+'%</p>':'')+'<button class="primary" data-action="edit" data-id="'+safe(item.id)+'">EDIT</button><button class="'+(available?"danger":"success")+'" data-action="toggle" data-id="'+safe(item.id)+'">'+(available?"MARK OUT OF STOCK":"MARK IN STOCK")+'</button><button class="danger" data-action="delete" data-id="'+safe(item.id)+'">DELETE</button></div>';}).join("");
 renderStockItems();
 }catch(error){console.error("MENU ERROR:",error);$("menuList").textContent="MENU ERROR: "+(error.code||"")+" "+error.message;$("stockList").textContent="Stock load failed.";}
 }
@@ -1018,6 +1018,7 @@ $("itemGstRate").value=String(item.gstRate||0);
 $("itemAvailable").value=String(item.available??true);
 $("saveItemBtn").textContent="SAVE CHANGES";
 $("cancelEditBtn").classList.remove("hidden");
+showPartnerPage("menu");
 $("menuForm").scrollIntoView({behavior:"smooth"});
 }else if(action==="toggle"){
 await updateDoc(itemRef,{available:!(item.available??true),updatedAt:serverTimestamp()});
