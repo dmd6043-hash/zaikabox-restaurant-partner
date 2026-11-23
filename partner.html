@@ -252,16 +252,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
   </form>
 </div>
 
-<div id="rejectionPopup" role="dialog" aria-modal="true" aria-labelledby="rejectionTitle">
-  <div class="rejection-modal">
-    <div class="eyebrow">ZAIKABOX APPLICATION UPDATE</div>
-    <h2 id="rejectionTitle">✕ Application Rejected</h2>
-    <p class="small">Super Admin ne aapki restaurant registration reject ki hai.</p>
-    <div class="reason" id="rejectionReasonPopupText">Rejection reason available nahi hai. ZaikaBox support se sampark karein.</div>
-    <p class="small">Agar aapko lagta hai ki ye decision galat hai, toh ZaikaBox support se sampark karein.</p>
-    <button class="primary" id="rejectionPopupCloseBtn" type="button">OK, CLOSE</button>
-  </div>
-</div>
+
 
 <div id="registrationSuccess" class="registration-success" role="status" aria-live="polite">
   <div class="success-mark">✓</div>
@@ -665,12 +656,7 @@ function showCorrectionApplication(application){
   setStatus("Correction Required: Details edit karein aur dobara submit karein.");
 }
 $("correctionLogoutBtn").addEventListener("click",logoutPartner);
-$("rejectionPopupCloseBtn").addEventListener("click",async()=>{
-  $("rejectionPopup").classList.remove("open");
-  await signOut(auth);
-  $("loginBox").classList.remove("hidden");
-  setStatus("Application rejected. Support se sampark karein.");
-});
+
 $("correctionForm").addEventListener("submit",async event=>{
   event.preventDefault();
   const user=auth.currentUser;
@@ -818,10 +804,9 @@ if(!accountSnapshot.exists()){
       return;
     }
     if(["rejected","application rejected"].includes(String(appStatus).trim().toLowerCase())){
-      $("loginBox").classList.add("hidden");
-      $("rejectionReasonPopupText").textContent=application.rejectionReason||application.rejectReason||application.reason||"Rejection reason available nahi hai. ZaikaBox support se sampark karein.";
-      $("rejectionPopup").classList.add("open");
-      setStatus("Application rejected. Rejection reason popup mein dekhein.");
+      await signOut(auth);
+      $("loginBox").classList.remove("hidden");
+      setStatus("Application rejected. ZaikaBox support se sampark karein.");
       return;
     }
     await signOut(auth);
