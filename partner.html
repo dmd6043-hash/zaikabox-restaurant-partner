@@ -135,7 +135,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 
 
 /* Preparation time selector modal */
-.prep-time-dialog{position:fixed;inset:0;z-index:9100;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.86);backdrop-filter:blur(8px)}
+.prep-time-dialog{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;box-sizing:border-box;width:100vw;height:100dvh;padding:20px;background:rgba(0,0,0,.86);backdrop-filter:blur(8px)}
 .prep-time-dialog.open{display:flex;animation:cardIn .2s ease}
 .prep-time-modal{width:100%;max-width:420px;padding:22px 20px;border:1px solid #a66a28;border-radius:20px;background:linear-gradient(145deg,#21180d,#09090c);box-shadow:0 24px 70px #000c;text-align:center}
 .prep-time-modal h3{margin:0 0 8px;color:#ffb44e}
@@ -1134,8 +1134,8 @@ if(!confirm("Order status "+status+" karna hai?"))return;
 button.disabled=true;button.textContent="UPDATING...";
 try{const batch=writeBatch(db);const update={status,updatedAt:serverTimestamp()};if(status==="Preparing"){update.preparingAt=serverTimestamp();}batch.update(doc(db,"orders",orderId),update);await batch.commit();setStatus("Order status updated: "+status);button.textContent="✓ "+status.toUpperCase();button.classList.add("confirmed");}catch(error){alert("ORDER ERROR: "+(error.code||"")+" - "+error.message);setStatus("Order update failed: "+error.message);button.disabled=false;button.textContent="START PREPARING";}
 });
-$("prepTimeMinus").addEventListener("click",()=>{selectedPrepMinutes=Math.max(5,selectedPrepMinutes-5);$("prepTimeValue").textContent=String(selectedPrepMinutes);});
-$("prepTimePlus").addEventListener("click",()=>{selectedPrepMinutes=Math.min(30,selectedPrepMinutes+5);$("prepTimeValue").textContent=String(selectedPrepMinutes);});
+$("prepTimeMinus").addEventListener("click",()=>{selectedPrepMinutes=Math.max(5,selectedPrepMinutes-1);$("prepTimeValue").textContent=String(selectedPrepMinutes);});
+$("prepTimePlus").addEventListener("click",()=>{selectedPrepMinutes=Math.min(30,selectedPrepMinutes+1);$("prepTimeValue").textContent=String(selectedPrepMinutes);});
 $("cancelPrepTime").addEventListener("click",()=>{pendingAcceptOrderId=null;$("prepTimeDialog").classList.remove("open");});
 $("confirmAcceptOrder").addEventListener("click",async()=>{
 if(!pendingAcceptOrderId||!currentRestaurantId)return;
