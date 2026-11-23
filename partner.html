@@ -372,7 +372,15 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 <div id="profileStats" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px"><div class="small">Loading business performance...</div></div>
 <p id="profileReportNote" class="small" style="margin:14px 0 0;color:#aaa">Figures are based on orders received by this restaurant.</p>
 </div>
-<div class="card"><h3 style="margin-top:0">Recent Order Activity</h3><div id="profileRecentOrders" class="small">Loading recent activity...</div></div>
+<div class="card" style="border:1px solid rgba(255,178,74,.35);background:linear-gradient(145deg,#17120d,#101114)">
+<div class="small" style="color:#ffb24a;font-weight:800;letter-spacing:1.5px">SMART BUSINESS ANALYSIS</div><h3 style="margin:6px 0 14px">Growth Strategy</h3>
+<div id="profileSmartInsights" class="small">Analysing your order history...</div>
+<div style="height:1px;background:#34302a;margin:16px 0"></div>
+<h4 style="margin:0 0 10px">Peak Order Time</h4><div id="profilePeakHours"></div>
+<div style="height:1px;background:#34302a;margin:16px 0"></div>
+<h4 style="margin:0 0 10px">Best Performing Day</h4><div id="profileWeekDays"></div>
+<p class="small" style="color:#aaa;margin:12px 0 0">Insights use order timestamps and order values available in your order history. More history makes patterns more reliable.</p>
+</div><div class="card"><h3 style="margin-top:0">Recent Order Activity</h3><div id="profileRecentOrders" class="small">Loading recent activity...</div></div>
 <div class="card"><button class="danger" type="button" id="profileLogoutBtn">LOGOUT</button></div>
 </section>
 
@@ -1059,8 +1067,41 @@ function profileAmount(order){
  const amount=Number(String(raw).replace(/[^0-9.]/g,""));
  return Number.isFinite(amount)?amount:0;
 }
+function renderSmartBusinessAnalysis(){
+ const insights=$("profileSmartInsights"),hoursHost=$("profilePeakHours"),daysHost=$("profileWeekDays");
+ if(!insights||!hoursHost||!daysHost)return;
+ const now=new Date(),today=new Date(now);today.setHours(0,0,0,0);
+ const yesterday=new Date(today);yesterday.setDate(yesterday.getDate()-1);
+ const dayOrders=partnerAllOrders.map(o=>({order:o,date:profileOrderDate(o),amount:profileAmount(o)})).filter(x=>x.date);
+ const todays=dayOrders.filter(x=>x.date>=today&&x.date<=now);
+ const yesterdays=dayOrders.filter(x=>x.date>=yesterday&&x.date<today);
+ const sum=arr=>arr.reduce((n,x)=>n+x.amount,0);
+ const todayValue=sum(todays),yesterdayValue=sum(yesterdays);
+ const diff=todayValue-yesterdayValue;
+ const pct=yesterdayValue>0?Math.round(diff/yesterdayValue*100):null;
+ const money=n=>"₹"+Math.round(n).toLocaleString("en-IN");
+ const compare=yesterdayValue===0
+  ? (todayValue>0?"Today has "+money(todayValue)+" in order value; yesterday had no recorded order value.":"Not enough order value yet to compare today and yesterday.")
+  : "Today: "+money(todayValue)+" · Yesterday: "+money(yesterdayValue)+" · "+(diff>=0?"↑ ":"↓ ")+money(Math.abs(diff))+" ("+Math.abs(pct||0)+"%) "+(diff>=0?"higher":"lower");
+ const weekdayNames=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+ const weekdayCounts=Array(7).fill(0),weekdayValues=Array(7).fill(0);
+ dayOrders.forEach(x=>{weekdayCounts[x.date.getDay()]++;weekdayValues[x.date.getDay()]+=x.amount;});
+ const bestDayIndex=weekdayCounts.reduce((best,n,i)=>n>weekdayCounts[best]?i:best,0);
+ const bestDay=weekdayCounts[bestDayIndex]>0?weekdayNames[bestDayIndex]:"Not enough data";
+ const slots=Array(12).fill(0),slotValues=Array(12).fill(0);
+ dayOrders.forEach(x=>{const slot=Math.floor(x.date.getHours()/2);slots[slot]++;slotValues[slot]+=x.amount;});
+ const bestSlot=slots.reduce((best,n,i)=>n>slots[best]?i:best,0);
+ const hourLabel=i=>{const a=i*2,b=a+2,fmt=h=>{const n=h%12||12;return n+(h<12?" AM":" PM");};return fmt(a)+" – "+fmt(b);};
+ const peak=slots[bestSlot]>0?hourLabel(bestSlot):"Not enough data";
+ const maxHour=Math.max(1,...slots),maxDay=Math.max(1,...weekdayCounts);
+ const insightBox=(title,body)=>'<div style="padding:12px;border-radius:13px;background:#111318;border:1px solid #30291f;margin:8px 0"><div style="color:#ffb24a;font-weight:800;font-size:11px;letter-spacing:1px">'+title+'</div><div style="font-size:14px;margin-top:5px;line-height:1.5">'+body+'</div></div>';
+ insights.innerHTML=insightBox("TODAY VS YESTERDAY",compare)+insightBox("BUSIEST TIME WINDOW",peak+" · "+(slots[bestSlot]||0)+" orders in recorded history")+insightBox("STRONGEST WEEKDAY",bestDay+" · "+(weekdayCounts[bestDayIndex]||0)+" orders in recorded history");
+ hoursHost.innerHTML=slots.map((n,i)=>'<div style="display:grid;grid-template-columns:92px 1fr 25px;gap:8px;align-items:center;margin:7px 0"><span class="small">'+hourLabel(i)+'</span><div style="height:9px;background:#292929;border-radius:8px;overflow:hidden"><div style="height:100%;width:'+(n/maxHour*100)+'%;background:linear-gradient(90deg,#a85b12,#ffb24a);border-radius:8px"></div></div><b class="small">'+n+'</b></div>').join("");
+ daysHost.innerHTML=weekdayNames.map((name,i)=>'<div style="display:grid;grid-template-columns:82px 1fr 25px;gap:8px;align-items:center;margin:7px 0"><span class="small">'+name+'</span><div style="height:9px;background:#292929;border-radius:8px;overflow:hidden"><div style="height:100%;width:'+(weekdayCounts[i]/maxDay*100)+'%;background:linear-gradient(90deg,#a85b12,#ffb24a);border-radius:8px"></div></div><b class="small">'+weekdayCounts[i]+'</b></div>').join("");
+}
 function renderProfileStats(){
  const host=$("profileStats"),recent=$("profileRecentOrders");
+ renderSmartBusinessAnalysis();
  if(!host||!recent)return;
  const now=new Date(),start=new Date(now);
  if(profileRangeDays===1)start.setHours(0,0,0,0);
