@@ -435,7 +435,7 @@ $("globalStatus").textContent=message;
 }
 
 function showPartnerPage(page){
-const allowed=["home","orders","menu","profile"];
+const allowed=["home","orders","menu","stock","profile"];
 if(!allowed.includes(page))page="home";
 allowed.forEach(name=>{
 $("page-"+name).classList.toggle("hidden",name!==page);
@@ -936,6 +936,12 @@ function resetMenuForm(){
 $("menuForm").reset();
 $("editItemId").value="";
 $("itemEmoji").value="";
+$("itemFoodType").value="Veg";
+$("itemGstEnabled").value="false";
+$("itemGstRate").value="0";
+$("itemImageUrl").value="";
+$("itemVariants").value="";
+$("itemPhotoPreview").style.display="none";
 $("saveItemBtn").textContent="ADD MENU ITEM";
 $("cancelEditBtn").classList.add("hidden");
 }
@@ -951,6 +957,11 @@ const category=$("itemCategory").value.trim();
 const description=$("itemDescription").value.trim();
 const emoji=$("itemEmoji").value.trim()||"";
 const available=$("itemAvailable").value==="true";
+const foodType=$("itemFoodType").value;
+const imageUrl=$("itemImageUrl").value.trim();
+const gstApplicable=$("itemGstEnabled").value==="true";
+const gstRate=gstApplicable?Number($("itemGstRate").value):0;
+const variants=$("itemVariants").value.split("\n").map(line=>line.trim()).filter(Boolean).map(line=>{const parts=line.split(/\s*[-:]\s*/);return {name:parts.slice(0,-1).join(" - ").trim(),price:Number(parts[parts.length-1])};}).filter(v=>v.name&&Number.isFinite(v.price)&&v.price>0);
 const editId=$("editItemId").value;
 
 if(!name||!category||!Number.isFinite(price)||price<=0){
@@ -960,7 +971,7 @@ return;
 
 $("saveItemBtn").disabled=true;
 $("menuMessage").textContent="Saving...";
-const itemData={name,price,category,description,emoji,available,updatedAt:serverTimestamp()};
+const itemData={name,price,category,description,emoji,available,foodType,imageUrl,variants,gstApplicable,gstRate,updatedAt:serverTimestamp()};
 
 try{
 if(editId){
@@ -999,6 +1010,11 @@ $("itemPrice").value=item.price??0;
 $("itemCategory").value=item.category||"";
 $("itemDescription").value=item.description||"";
 $("itemEmoji").value=item.emoji||"";
+$("itemFoodType").value=item.foodType||"Veg";
+$("itemImageUrl").value=item.imageUrl||"";
+$("itemVariants").value=Array.isArray(item.variants)?item.variants.map(v=>v.name+" - "+v.price).join("\n"):"";
+$("itemGstEnabled").value=String(!!item.gstApplicable);
+$("itemGstRate").value=String(item.gstRate||0);
 $("itemAvailable").value=String(item.available??true);
 $("saveItemBtn").textContent="SAVE CHANGES";
 $("cancelEditBtn").classList.remove("hidden");
@@ -1020,6 +1036,19 @@ button.disabled=false;
 }
 });
 
+$("makeAiPhotoPrompt").addEventListener("click",()=>{
+ const name=$("itemName").value.trim()||"delicious food item";
+ const desc=$("itemDescription").value.trim();
+ const prompt="Create a realistic professional restaurant menu photograph of "+name+". "+desc+". Show only the actual dish in a clean premium serving plate, appetising natural lighting, dark neutral restaurant background, top-down three-quarter food photography, high detail, no text, no watermark, square composition. The image must accurately represent the dish and ingredients.";
+ if(navigator.clipboard?.writeText){navigator.clipboard.writeText(prompt).then(()=>{$("aiPhotoHelp").textContent="AI photo prompt copied. Open your image AI tool, generate the dish image, then paste its image URL here.";}).catch(()=>{$("aiPhotoHelp").textContent=prompt;});}
+ else $("aiPhotoHelp").textContent=prompt;
+});
+$("previewItemPhoto").addEventListener("click",()=>{
+ const url=$("itemImageUrl").value.trim();
+ if(!url){$("aiPhotoHelp").textContent="Please paste an image URL first.";return;}
+ $("itemPhotoPreviewImg").src=url;
+ $("itemPhotoPreview").style.display="block";
+});
 $("cancelEditBtn").addEventListener("click",resetMenuForm);
 $("refreshMenuBtn").addEventListener("click",loadMenu);
 
