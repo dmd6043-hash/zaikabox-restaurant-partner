@@ -1392,6 +1392,17 @@ startLiveOrders();
 });
 </script>
 
+
+<script>
+// Fallback diagnostic if the partner module cannot initialize.
+window.setTimeout(() => {
+  const status = document.getElementById("globalStatus");
+  if (status && /partner panel starting/i.test(status.textContent || "")) {
+    status.textContent = "APP START ERROR: Partner JavaScript/Firebase module start nahi hua. Internet connection aur Firebase CDN loading check kijiye; page refresh karke dobara try karein.";
+  }
+}, 15000);
+</script>
+
 <!-- Restaurant Partner PWA Service Worker -->
 <script>
 if ("serviceWorker" in navigator) {
