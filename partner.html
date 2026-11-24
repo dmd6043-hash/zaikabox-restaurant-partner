@@ -635,11 +635,9 @@ $("saveRestaurantPhotosBtn").addEventListener("click",async()=>{
  const unique=[...new Set(urls)];
  const button=$("saveRestaurantPhotosBtn");button.disabled=true;button.textContent="SAVING...";
  try{
+  // Store each photo only once to keep the Firestore document small.
   await updateDoc(doc(db,"restaurants",currentRestaurantId),{
    coverImageUrl:cover,
-   imageUrl:cover,
-   bannerUrl:cover,
-   photoUrl:cover,
    galleryImages:unique,
    updatedAt:serverTimestamp()
   });
