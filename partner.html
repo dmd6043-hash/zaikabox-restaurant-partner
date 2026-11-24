@@ -356,7 +356,15 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 <div class="small" style="color:#ffb24a;font-weight:800;letter-spacing:1.5px">RESTAURANT SHOWCASE</div>
 <h3 style="margin:7px 0">Restaurant Photos</h3>
 <p class="small">Add a large cover photo and extra photos. Customers will see these on your ZaikaBox restaurant card and can swipe through the gallery.</p>
-<label for="restaurantCoverImageUrl">Cover Image URL</label>
+<label>Upload Cover Photo from Phone</label>
+<input id="restaurantCoverPhotoFile" type="file" accept="image/jpeg,image/png,image/webp" style="display:none">
+<button class="secondary" type="button" id="chooseRestaurantCoverBtn">📷 UPLOAD COVER PHOTO</button>
+<p id="restaurantCoverUploadName" class="small">No cover photo selected.</p>
+<label>Upload More Restaurant Photos</label>
+<input id="restaurantGalleryPhotoFiles" type="file" accept="image/jpeg,image/png,image/webp" multiple style="display:none">
+<button class="secondary" type="button" id="chooseRestaurantGalleryBtn">＋ UPLOAD MORE PHOTOS</button>
+<p id="restaurantGalleryUploadName" class="small">You can select multiple photos.</p>
+<label for="restaurantCoverImageUrl">Or Cover Image URL</label>
 <input id="restaurantCoverImageUrl" type="url" maxlength="1500" placeholder="https://example.com/restaurant-cover.jpg">
 <label for="restaurantGalleryImageUrls">More Restaurant Photos (one image URL per line)</label>
 <textarea id="restaurantGalleryImageUrls" rows="4" maxlength="6000" placeholder="https://example.com/photo-2.jpg&#10;https://example.com/photo-3.jpg"></textarea>
@@ -459,6 +467,8 @@ let selectedPrepMinutes=15;
 let currentStockFilter="all";
 let currentStockCategory="all";
 let selectedMenuImageData="";
+let selectedRestaurantCoverData="";
+let selectedRestaurantGalleryData=[];
 let ordersUnsubscribe=null;
 
 function setStatus(message){
@@ -485,6 +495,53 @@ const shortcut=event.target.closest("[data-goto]");
 if(shortcut)showPartnerPage(shortcut.dataset.goto);
 });
 $("profileLogoutBtn").addEventListener("click",logoutPartner);
+function compressRestaurantPhoto(file){
+ return new Promise((resolve,reject)=>{
+  if(!file||!file.type.startsWith("image/")){reject(new Error("Please select a JPG, PNG or WEBP image."));return;}
+  if(file.size>10*1024*1024){reject(new Error("Each photo must be 10 MB or smaller."));return;}
+  const reader=new FileReader();
+  reader.onerror=()=>reject(new Error("Could not read selected photo."));
+  reader.onload=()=>{
+   const image=new Image();
+   image.onerror=()=>reject(new Error("Could not open selected photo."));
+   image.onload=()=>{
+    const max=1200,scale=Math.min(1,max/Math.max(image.width,image.height)),canvas=document.createElement("canvas");
+    canvas.width=Math.max(1,Math.round(image.width*scale));canvas.height=Math.max(1,Math.round(image.height*scale));
+    canvas.getContext("2d").drawImage(image,0,0,canvas.width,canvas.height);
+    resolve(canvas.toDataURL("image/jpeg",0.68));
+   };
+   image.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+ });
+}
+$("chooseRestaurantCoverBtn").addEventListener("click",()=>$("restaurantCoverPhotoFile").click());
+$("chooseRestaurantGalleryBtn").addEventListener("click",()=>$("restaurantGalleryPhotoFiles").click());
+$("restaurantCoverPhotoFile").addEventListener("change",async()=>{
+ const file=$("restaurantCoverPhotoFile").files?.[0];if(!file)return;
+ $("restaurantPhotosMessage").textContent="Preparing cover photo...";
+ try{
+  selectedRestaurantCoverData=await compressRestaurantPhoto(file);
+  $("restaurantCoverImageUrl").value="";
+  $("restaurantCoverPreviewImage").src=selectedRestaurantCoverData;
+  $("restaurantCoverPreview").style.display="block";
+  $("restaurantCoverUploadName").textContent="Ready: "+file.name;
+  $("restaurantPhotosMessage").textContent="Cover photo ready. Press SAVE RESTAURANT PHOTOS.";
+ }catch(error){$("restaurantPhotosMessage").textContent=error.message;}
+});
+$("restaurantGalleryPhotoFiles").addEventListener("change",async()=>{
+ const files=Array.from($("restaurantGalleryPhotoFiles").files||[]);
+ if(!files.length)return;
+ $("restaurantPhotosMessage").textContent="Preparing gallery photos...";
+ try{
+  const additions=[];
+  for(const file of files)additions.push(await compressRestaurantPhoto(file));
+  selectedRestaurantGalleryData=[...selectedRestaurantGalleryData,...additions];
+  $("restaurantGalleryUploadName").textContent=selectedRestaurantGalleryData.length+" extra photo(s) ready.";
+  $("restaurantPhotosMessage").textContent="Gallery photos ready. Press SAVE RESTAURANT PHOTOS.";
+ }catch(error){$("restaurantPhotosMessage").textContent=error.message;}
+});
+
 function renderRestaurantCoverPreview(){
  const url=$("restaurantCoverImageUrl").value.trim(),box=$("restaurantCoverPreview"),image=$("restaurantCoverPreviewImage");
  if(!url){box.style.display="none";return;}
@@ -494,11 +551,12 @@ function renderRestaurantCoverPreview(){
 $("restaurantCoverImageUrl").addEventListener("input",renderRestaurantCoverPreview);
 $("saveRestaurantPhotosBtn").addEventListener("click",async()=>{
  if(!currentRestaurantId)return;
- const cover=$("restaurantCoverImageUrl").value.trim();
-  const gallery=$("restaurantGalleryImageUrls").value.split(/\r?\n/).map(url=>url.trim()).filter(Boolean);
+  const cover=selectedRestaurantCoverData||$("restaurantCoverImageUrl").value.trim();
+  const gallery=[...selectedRestaurantGalleryData,...$("restaurantGalleryImageUrls").value.split(/\r?\n/).map(url=>url.trim()).filter(Boolean)];
  const urls=[cover,...gallery].filter(Boolean);
-  if(urls.some(url=>!/^https:\/\//i.test(url))){$("restaurantPhotosMessage").textContent="Please use valid public HTTPS image URLs only.";return;}
+  if(urls.some(url=>!url.startsWith("data:image/jpeg;base64,")&&!/^https:\/\//i.test(url))){$("restaurantPhotosMessage").textContent="Please upload an image or use a valid public HTTPS image URL.";return;}
  if(urls.length>12){$("restaurantPhotosMessage").textContent="Maximum 12 photos allowed, including the cover photo.";return;}
+  if(urls.reduce((sum,url)=>sum+url.length,0)>900000){$("restaurantPhotosMessage").textContent="Photos are too large together. Upload fewer or smaller photos.";return;}
  const unique=[...new Set(urls)];
  const button=$("saveRestaurantPhotosBtn");button.disabled=true;button.textContent="SAVING...";
  try{
@@ -939,6 +997,8 @@ renderRestaurantOnlineStatus();
 $("restaurantName").textContent=currentRestaurantName;
 $("profileRestaurantName").textContent=currentRestaurantName;
 $("restaurantCoverImageUrl").value=restaurant.coverImageUrl||restaurant.imageUrl||restaurant.bannerUrl||restaurant.photoUrl||"";
+ selectedRestaurantCoverData="";selectedRestaurantGalleryData=[];
+ $("restaurantCoverUploadName").textContent="No new cover photo selected.";$("restaurantGalleryUploadName").textContent="You can select multiple photos.";
 $("restaurantGalleryImageUrls").value=Array.isArray(restaurant.galleryImages)?restaurant.galleryImages.join("\\n"):"";
 renderRestaurantCoverPreview();
 $("profilePartnerEmail").textContent="Partner email: "+(user.email||"");
