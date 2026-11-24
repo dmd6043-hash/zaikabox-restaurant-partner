@@ -394,6 +394,20 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 </div>
 </div>
 
+<script>
+// ZAIKABOX STARTUP ERROR REPORTER
+window.addEventListener("error", function(event) {
+  const box = document.getElementById("globalStatus");
+  if (box) box.textContent = "STARTUP ERROR: " + (event.message || "JavaScript load failed") + (event.filename ? " | " + event.filename.split("/").pop() : "");
+});
+window.addEventListener("unhandledrejection", function(event) {
+  const box = document.getElementById("globalStatus");
+  const reason = event.reason;
+  if (box) box.textContent = "FIREBASE/MODULE ERROR: " + (reason && reason.message ? reason.message : String(reason || "Unknown error"));
+});
+</script>
+
+
 <script type="module">
 import {initializeApp} from
 "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
