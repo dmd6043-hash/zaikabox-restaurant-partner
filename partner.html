@@ -495,9 +495,9 @@ $("restaurantCoverImageUrl").addEventListener("input",renderRestaurantCoverPrevi
 $("saveRestaurantPhotosBtn").addEventListener("click",async()=>{
  if(!currentRestaurantId)return;
  const cover=$("restaurantCoverImageUrl").value.trim();
- const gallery=$("restaurantGalleryImageUrls").value.split(/\\r?\\n/).map(url=>url.trim()).filter(Boolean);
+  const gallery=$("restaurantGalleryImageUrls").value.split(/\r?\n/).map(url=>url.trim()).filter(Boolean);
  const urls=[cover,...gallery].filter(Boolean);
- if(urls.some(url=>!/^https:\\/\\//i.test(url))){$("restaurantPhotosMessage").textContent="Please use valid public HTTPS image URLs only.";return;}
+  if(urls.some(url=>!/^https:\/\//i.test(url))){$("restaurantPhotosMessage").textContent="Please use valid public HTTPS image URLs only.";return;}
  if(urls.length>12){$("restaurantPhotosMessage").textContent="Maximum 12 photos allowed, including the cover photo.";return;}
  const unique=[...new Set(urls)];
  const button=$("saveRestaurantPhotosBtn");button.disabled=true;button.textContent="SAVING...";
