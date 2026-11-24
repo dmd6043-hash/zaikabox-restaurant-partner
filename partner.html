@@ -158,6 +158,8 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 #rejectDialog.reject-panel .reject-actions{padding:18px 20px 20px;background:#211016;border:1px solid #a63d50;border-top:0;border-radius:0 0 20px 20px}
 #rejectDialog.reject-panel .reject-actions button{width:auto;min-width:0}
 
+
+#restaurantCoverSettings input,#restaurantCoverSettings textarea{width:100%;box-sizing:border-box;background:#0b0d11;border:1px solid #353b45;border-radius:12px;color:#fff;padding:13px;font:inherit;margin:6px 0 12px}#restaurantCoverSettings label{display:block;color:#e8e8e8;font-size:12px;font-weight:800;margin-top:8px}#restaurantCoverSettings button{width:100%;margin-top:8px}
 </style>
 </head>
 
@@ -350,6 +352,19 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><div class="small" style="color:#ffb24a;letter-spacing:2px;font-weight:800">RESTAURANT PARTNER</div><h2 style="margin:7px 0">Business Profile</h2><p class="small">Your restaurant performance at a glance.</p></div><div style="width:58px;height:58px;border-radius:18px;background:linear-gradient(135deg,#ffb24a,#a85b12);display:grid;place-items:center;font-size:27px">🏪</div></div>
 <h3 id="profileRestaurantName">Restaurant</h3><p class="small" id="profilePartnerEmail"></p><p class="small">Account status: Active</p>
 </div>
+<div class="card" id="restaurantCoverSettings" style="border:1px solid rgba(255,178,74,.4);background:linear-gradient(145deg,#21170e,#101114)">
+<div class="small" style="color:#ffb24a;font-weight:800;letter-spacing:1.5px">RESTAURANT SHOWCASE</div>
+<h3 style="margin:7px 0">Restaurant Photos</h3>
+<p class="small">Add a large cover photo and extra photos. Customers will see these on your ZaikaBox restaurant card and can swipe through the gallery.</p>
+<label for="restaurantCoverImageUrl">Cover Image URL</label>
+<input id="restaurantCoverImageUrl" type="url" maxlength="1500" placeholder="https://example.com/restaurant-cover.jpg">
+<label for="restaurantGalleryImageUrls">More Restaurant Photos (one image URL per line)</label>
+<textarea id="restaurantGalleryImageUrls" rows="4" maxlength="6000" placeholder="https://example.com/photo-2.jpg&#10;https://example.com/photo-3.jpg"></textarea>
+<div id="restaurantCoverPreview" style="display:none;margin:10px 0;border-radius:16px;overflow:hidden;border:1px solid #5a3b20"><img id="restaurantCoverPreviewImage" alt="Restaurant cover preview" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block"></div>
+<p class="small" style="color:#aaa">Use public HTTPS image links. First image is the main cover; extra photos appear in swipe gallery. Avoid private or temporary links.</p>
+<button class="success" type="button" id="saveRestaurantPhotosBtn">SAVE RESTAURANT PHOTOS</button>
+<p id="restaurantPhotosMessage" class="small" style="margin:10px 0 0"></p>
+</div>
 <div class="card" style="border:1px solid rgba(255,178,74,.35);background:linear-gradient(145deg,#21170e,#101010)">
 <div class="small" style="color:#ffb24a;font-weight:800;letter-spacing:1.5px">PERFORMANCE OVERVIEW</div><h3 style="margin:6px 0">Your Business</h3><span class="tag">LIVE REPORT</span>
 <div style="display:flex;gap:8px;margin:14px 0;flex-wrap:wrap"><button type="button" class="secondary" data-profile-range="1" style="flex:1;min-width:80px">Today</button><button type="button" class="secondary" data-profile-range="7" style="flex:1;min-width:80px">7 Days</button><button type="button" class="secondary" data-profile-range="30" style="flex:1;min-width:80px">30 Days</button></div>
@@ -456,6 +471,37 @@ const shortcut=event.target.closest("[data-goto]");
 if(shortcut)showPartnerPage(shortcut.dataset.goto);
 });
 $("profileLogoutBtn").addEventListener("click",logoutPartner);
+function renderRestaurantCoverPreview(){
+ const url=$("restaurantCoverImageUrl").value.trim(),box=$("restaurantCoverPreview"),image=$("restaurantCoverPreviewImage");
+ if(!url){box.style.display="none";return;}
+ image.src=url;box.style.display="block";
+ image.onerror=()=>{box.style.display="none";$("restaurantPhotosMessage").textContent="Preview could not load. Check that the image link is public and correct.";};
+}
+$("restaurantCoverImageUrl").addEventListener("input",renderRestaurantCoverPreview);
+$("saveRestaurantPhotosBtn").addEventListener("click",async()=>{
+ if(!currentRestaurantId)return;
+ const cover=$("restaurantCoverImageUrl").value.trim();
+ const gallery=$("restaurantGalleryImageUrls").value.split(/\\r?\\n/).map(url=>url.trim()).filter(Boolean);
+ const urls=[cover,...gallery].filter(Boolean);
+ if(urls.some(url=>!/^https:\\/\\//i.test(url))){$("restaurantPhotosMessage").textContent="Please use valid public HTTPS image URLs only.";return;}
+ if(urls.length>12){$("restaurantPhotosMessage").textContent="Maximum 12 photos allowed, including the cover photo.";return;}
+ const unique=[...new Set(urls)];
+ const button=$("saveRestaurantPhotosBtn");button.disabled=true;button.textContent="SAVING...";
+ try{
+  await updateDoc(doc(db,"restaurants",currentRestaurantId),{
+   coverImageUrl:cover,
+   imageUrl:cover,
+   bannerUrl:cover,
+   photoUrl:cover,
+   galleryImages:unique,
+   updatedAt:serverTimestamp()
+  });
+  $("restaurantPhotosMessage").textContent="✓ Restaurant photos saved. Customers can see the updated cover and swipe gallery.";
+ }catch(error){
+  console.error("RESTAURANT PHOTO SAVE ERROR:",error);
+  $("restaurantPhotosMessage").textContent="Save failed: "+error.message+". Firestore security rules may need to allow these restaurant photo fields.";
+ }finally{button.disabled=false;button.textContent="SAVE RESTAURANT PHOTOS";}
+});
 
 function renderRestaurantOnlineStatus(){
 const badge=$("restaurantOnlineBadge"),button=$("toggleRestaurantOnline"),help=$("restaurantOnlineHelp");
@@ -878,6 +924,9 @@ isRestaurantOnline=restaurant.isAcceptingOrders!==false && restaurant.isOnline!=
 renderRestaurantOnlineStatus();
 $("restaurantName").textContent=currentRestaurantName;
 $("profileRestaurantName").textContent=currentRestaurantName;
+$("restaurantCoverImageUrl").value=restaurant.coverImageUrl||restaurant.imageUrl||restaurant.bannerUrl||restaurant.photoUrl||"";
+$("restaurantGalleryImageUrls").value=Array.isArray(restaurant.galleryImages)?restaurant.galleryImages.join("\\n"):"";
+renderRestaurantCoverPreview();
 $("profilePartnerEmail").textContent="Partner email: "+(user.email||"");
 $("partnerMessage").textContent="Logged in: "+(user.email||"");
 showPartnerPage("home");
