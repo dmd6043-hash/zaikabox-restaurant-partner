@@ -160,6 +160,17 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 
 
 #restaurantCoverSettings input,#restaurantCoverSettings textarea{width:100%;box-sizing:border-box;background:#0b0d11;border:1px solid #353b45;border-radius:12px;color:#fff;padding:13px;font:inherit;margin:6px 0 12px}#restaurantCoverSettings label{display:block;color:#e8e8e8;font-size:12px;font-weight:800;margin-top:8px}#restaurantCoverSettings button{width:100%;margin-top:8px}
+
+/* Mobile restaurant photo cropper */
+#restaurantCropDialog{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.9);backdrop-filter:blur(10px)}
+#restaurantCropDialog.open{display:flex}
+.restaurant-crop-panel{width:100%;max-width:520px;padding:18px;border:1px solid #87531f;border-radius:22px;background:linear-gradient(145deg,#171b21,#08090c);box-shadow:0 24px 80px #000c}
+.restaurant-crop-panel h3{font-size:20px;color:#ffb24a;margin-bottom:6px}
+#restaurantCropCanvas{display:block;width:100%;aspect-ratio:16/9;height:auto;margin:14px 0;border-radius:12px;background:#08090c;border:1px solid #ffffff30;touch-action:none;cursor:grab}
+#restaurantCropCanvas:active{cursor:grabbing}
+.restaurant-crop-panel input[type=range]{padding:0;min-height:30px;margin:8px 0 14px;accent-color:#ff8a00}
+.restaurant-crop-actions{display:flex;gap:8px;margin-top:14px}
+.restaurant-crop-actions button{flex:1;min-height:46px;margin:0}
 </style>
 </head>
 
@@ -495,51 +506,108 @@ const shortcut=event.target.closest("[data-goto]");
 if(shortcut)showPartnerPage(shortcut.dataset.goto);
 });
 $("profileLogoutBtn").addEventListener("click",logoutPartner);
-function compressRestaurantPhoto(file){
- return new Promise((resolve,reject)=>{
-  if(!file||!file.type.startsWith("image/")){reject(new Error("Please select a JPG, PNG or WEBP image."));return;}
-  if(file.size>10*1024*1024){reject(new Error("Each photo must be 10 MB or smaller."));return;}
-  const reader=new FileReader();
-  reader.onerror=()=>reject(new Error("Could not read selected photo."));
-  reader.onload=()=>{
-   const image=new Image();
-   image.onerror=()=>reject(new Error("Could not open selected photo."));
-   image.onload=()=>{
-    const max=1200,scale=Math.min(1,max/Math.max(image.width,image.height)),canvas=document.createElement("canvas");
-    canvas.width=Math.max(1,Math.round(image.width*scale));canvas.height=Math.max(1,Math.round(image.height*scale));
-    canvas.getContext("2d").drawImage(image,0,0,canvas.width,canvas.height);
-    resolve(canvas.toDataURL("image/jpeg",0.68));
-   };
-   image.src=reader.result;
-  };
-  reader.readAsDataURL(file);
- });
+let restaurantCropQueue=[];
+let restaurantCropTarget="cover";
+let restaurantCropImage=null;
+let restaurantCropScale=1;
+let restaurantCropBaseScale=1;
+let restaurantCropX=0,restaurantCropY=0;
+let restaurantCropPointer=null;
+const restaurantCropCanvas=$("restaurantCropCanvas");
+const restaurantCropCtx=restaurantCropCanvas.getContext("2d");
+function drawRestaurantCrop(){
+ const cw=restaurantCropCanvas.width,ch=restaurantCropCanvas.height;
+ restaurantCropCtx.clearRect(0,0,cw,ch);
+ if(!restaurantCropImage)return;
+ const w=restaurantCropImage.naturalWidth*restaurantCropBaseScale*restaurantCropScale;
+ const h=restaurantCropImage.naturalHeight*restaurantCropBaseScale*restaurantCropScale;
+ const minX=cw-w,minY=ch-h;
+ restaurantCropX=Math.min(0,Math.max(minX,restaurantCropX));
+ restaurantCropY=Math.min(0,Math.max(minY,restaurantCropY));
+ restaurantCropCtx.drawImage(restaurantCropImage,restaurantCropX,restaurantCropY,w,h);
 }
+function openRestaurantCrop(file,target){
+ restaurantCropTarget=target;
+ const reader=new FileReader();
+ reader.onerror=()=>{$("restaurantPhotosMessage").textContent="Could not read selected photo.";};
+ reader.onload=()=>{
+  const image=new Image();
+  image.onerror=()=>{$("restaurantPhotosMessage").textContent="Could not open selected photo.";};
+  image.onload=()=>{
+   restaurantCropImage=image;
+   restaurantCropBaseScale=Math.max(restaurantCropCanvas.width/image.naturalWidth,restaurantCropCanvas.height/image.naturalHeight);
+   restaurantCropScale=1;
+   const w=image.naturalWidth*restaurantCropBaseScale,h=image.naturalHeight*restaurantCropBaseScale;
+   restaurantCropX=(restaurantCropCanvas.width-w)/2;
+   restaurantCropY=(restaurantCropCanvas.height-h)/2;
+   $("restaurantCropZoom").value="1";
+   $("restaurantCropDialog").classList.add("open");
+   drawRestaurantCrop();
+  };
+  image.src=reader.result;
+ };
+ reader.readAsDataURL(file);
+}
+function nextRestaurantGalleryCrop(){
+ if(!restaurantCropQueue.length){$("restaurantPhotosMessage").textContent=selectedRestaurantGalleryData.length+" gallery photo(s) cropped and ready. Press SAVE RESTAURANT PHOTOS.";return;}
+ const file=restaurantCropQueue.shift();
+ openRestaurantCrop(file,"gallery");
+}
+$("restaurantCropZoom").addEventListener("input",()=>{
+ const old=restaurantCropScale, next=Number($("restaurantCropZoom").value);
+ const cx=restaurantCropCanvas.width/2,cy=restaurantCropCanvas.height/2;
+ const ratio=next/old;
+ restaurantCropX=cx-(cx-restaurantCropX)*ratio;
+ restaurantCropY=cy-(cy-restaurantCropY)*ratio;
+ restaurantCropScale=next;drawRestaurantCrop();
+});
+restaurantCropCanvas.addEventListener("pointerdown",event=>{
+ if(!restaurantCropImage)return;
+ restaurantCropPointer={id:event.pointerId,x:event.clientX,y:event.clientY};
+ restaurantCropCanvas.setPointerCapture(event.pointerId);
+});
+restaurantCropCanvas.addEventListener("pointermove",event=>{
+ if(!restaurantCropPointer||restaurantCropPointer.id!==event.pointerId)return;
+ const rect=restaurantCropCanvas.getBoundingClientRect();
+ restaurantCropX+=(event.clientX-restaurantCropPointer.x)*(restaurantCropCanvas.width/rect.width);
+ restaurantCropY+=(event.clientY-restaurantCropPointer.y)*(restaurantCropCanvas.height/rect.height);
+ restaurantCropPointer.x=event.clientX;restaurantCropPointer.y=event.clientY;drawRestaurantCrop();
+});
+["pointerup","pointercancel","lostpointercapture"].forEach(type=>restaurantCropCanvas.addEventListener(type,()=>{restaurantCropPointer=null;}));
+$("cancelRestaurantCrop").addEventListener("click",()=>{
+ $("restaurantCropDialog").classList.remove("open");restaurantCropImage=null;restaurantCropQueue=[];
+ $("restaurantPhotosMessage").textContent="Photo crop cancelled.";
+});
+$("applyRestaurantCrop").addEventListener("click",()=>{
+ if(!restaurantCropImage)return;
+ const data=restaurantCropCanvas.toDataURL("image/jpeg",0.76);
+ if(restaurantCropTarget==="cover"){
+  selectedRestaurantCoverData=data;$("restaurantCoverImageUrl").value="";
+  $("restaurantCoverPreviewImage").src=data;$("restaurantCoverPreview").style.display="block";
+  $("restaurantCoverUploadName").textContent="Cropped cover photo ready.";
+ }else{
+  selectedRestaurantGalleryData.push(data);
+  $("restaurantGalleryUploadName").textContent=selectedRestaurantGalleryData.length+" gallery photo(s) cropped and ready.";
+ }
+ $("restaurantCropDialog").classList.remove("open");restaurantCropImage=null;
+ if(restaurantCropTarget==="gallery")nextRestaurantGalleryCrop();
+ else $("restaurantPhotosMessage").textContent="Cover photo cropped and ready. Press SAVE RESTAURANT PHOTOS.";
+});
 $("chooseRestaurantCoverBtn").addEventListener("click",()=>$("restaurantCoverPhotoFile").click());
 $("chooseRestaurantGalleryBtn").addEventListener("click",()=>$("restaurantGalleryPhotoFiles").click());
-$("restaurantCoverPhotoFile").addEventListener("change",async()=>{
+$("restaurantCoverPhotoFile").addEventListener("change",()=>{
  const file=$("restaurantCoverPhotoFile").files?.[0];if(!file)return;
- $("restaurantPhotosMessage").textContent="Preparing cover photo...";
- try{
-  selectedRestaurantCoverData=await compressRestaurantPhoto(file);
-  $("restaurantCoverImageUrl").value="";
-  $("restaurantCoverPreviewImage").src=selectedRestaurantCoverData;
-  $("restaurantCoverPreview").style.display="block";
-  $("restaurantCoverUploadName").textContent="Ready: "+file.name;
-  $("restaurantPhotosMessage").textContent="Cover photo ready. Press SAVE RESTAURANT PHOTOS.";
- }catch(error){$("restaurantPhotosMessage").textContent=error.message;}
+ if(file.size>10*1024*1024){$("restaurantPhotosMessage").textContent="Photo must be 10 MB or smaller.";return;}
+ $("restaurantPhotosMessage").textContent="Opening crop editor...";
+ openRestaurantCrop(file,"cover");
 });
-$("restaurantGalleryPhotoFiles").addEventListener("change",async()=>{
+$("restaurantGalleryPhotoFiles").addEventListener("change",()=>{
  const files=Array.from($("restaurantGalleryPhotoFiles").files||[]);
  if(!files.length)return;
- $("restaurantPhotosMessage").textContent="Preparing gallery photos...";
- try{
-  const additions=[];
-  for(const file of files)additions.push(await compressRestaurantPhoto(file));
-  selectedRestaurantGalleryData=[...selectedRestaurantGalleryData,...additions];
-  $("restaurantGalleryUploadName").textContent=selectedRestaurantGalleryData.length+" extra photo(s) ready.";
-  $("restaurantPhotosMessage").textContent="Gallery photos ready. Press SAVE RESTAURANT PHOTOS.";
- }catch(error){$("restaurantPhotosMessage").textContent=error.message;}
+ if(files.some(file=>file.size>10*1024*1024)){$("restaurantPhotosMessage").textContent="Each photo must be 10 MB or smaller.";return;}
+ restaurantCropQueue=files.slice(1);
+ $("restaurantPhotosMessage").textContent="Crop each gallery photo one by one.";
+ openRestaurantCrop(files[0],"gallery");
 });
 
 function renderRestaurantCoverPreview(){
@@ -1486,5 +1554,14 @@ if ("serviceWorker" in navigator) {
   });
 }
 </script>
+
+<div id="restaurantCropDialog" aria-modal="true" role="dialog" aria-label="Crop restaurant photo">
+ <div class="restaurant-crop-panel">
+  <h3>Adjust Photo</h3><p class="small">Drag photo to position it. Use zoom to fit the important part inside the frame.</p>
+  <canvas id="restaurantCropCanvas" width="1200" height="675"></canvas>
+  <label for="restaurantCropZoom">Zoom</label><input id="restaurantCropZoom" type="range" min="1" max="3" step="0.01" value="1">
+  <div class="restaurant-crop-actions"><button type="button" class="secondary" id="cancelRestaurantCrop">CANCEL</button><button type="button" class="primary" id="applyRestaurantCrop">USE THIS CROP</button></div>
+ </div>
+</div>
 </body>
 </html>
