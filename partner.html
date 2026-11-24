@@ -631,7 +631,7 @@ $("saveRestaurantPhotosBtn").addEventListener("click",async()=>{
  const urls=[cover,...gallery].filter(Boolean);
   if(urls.some(url=>!url.startsWith("data:image/jpeg;base64,")&&!/^https:\/\//i.test(url))){$("restaurantPhotosMessage").textContent="Please upload an image or use a valid public HTTPS image URL.";return;}
  if(urls.length>12){$("restaurantPhotosMessage").textContent="Maximum 12 photos allowed, including the cover photo.";return;}
-  if(urls.reduce((sum,url)=>sum+url.length,0)>900000){$("restaurantPhotosMessage").textContent="Photos are too large together. Upload fewer or smaller photos.";return;}
+  if(urls.reduce((sum,url)=>sum+url.length,0)>350000){$("restaurantPhotosMessage").textContent="Photos are too large together. Please use smaller/compressed photos (total limit 350 KB).";return;}
  const unique=[...new Set(urls)];
  const button=$("saveRestaurantPhotosBtn");button.disabled=true;button.textContent="SAVING...";
  try{
