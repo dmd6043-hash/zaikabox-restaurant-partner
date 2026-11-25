@@ -378,7 +378,7 @@ hr{border:0;border-top:1px solid #292e35;margin:17px 0}
 <p id="restaurantGalleryUploadName" class="small">You can select multiple photos.</p>
  <div id="restaurantGalleryManageList" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0"></div>
 <div id="restaurantCoverPreview" style="display:none;margin:10px 0;border-radius:16px;overflow:hidden;border:1px solid #5a3b20"><img id="restaurantCoverPreviewImage" alt="Restaurant cover preview" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block"></div>
-<p class="small" style="color:#aaa">Phone Gallery se photos select kijiye, crop kijiye aur save kijiye. Pehli cover photo restaurant card par dikhegi; extra photos swipe gallery mein dikhenge.</p>
+<p class="small" style="color:#aaa">Select photos from your phone gallery, crop them, and save. The first photo will appear as your restaurant cover; additional photos will appear in the swipeable gallery.</p>
 <button class="success" type="button" id="saveRestaurantPhotosBtn">SAVE RESTAURANT PHOTOS</button>
 <p id="restaurantPhotosMessage" class="small" style="margin:10px 0 0"></p>
 </div>
@@ -808,7 +808,7 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
   }
   const phoneDigits=phone.replace(/[\s().-]/g,"");
   if(!/^\+?[1-9]\d{6,14}$/.test(phoneDigits)){
-    $("registrationMessage").textContent="Valid international mobile number bhariye, country code ke saath (7–15 digits). Example: +1 202 555 0123.";
+    $("registrationMessage").textContent="Enter a valid international mobile number with country code (7–15 digits). Example: +1 202 555 0123.";
     return;
   }
   const button=$("submitRegistrationBtn");
@@ -875,7 +875,7 @@ $("restaurantRegistrationForm").addEventListener("submit",async event=>{
     try{if(whatsappTab && !whatsappTab.closed)whatsappTab.close();}catch(_){}
     console.error("RESTAURANT REGISTRATION ERROR:",error);
     $("registrationMessage").textContent=(error.code||"")+" - "+error.message;
-    setStatus("Registration failed. Details form mein dekhein.");
+    setStatus("Registration failed. Please review the form details.");
     if(auth.currentUser && registrationInProgress){try{await signOut(auth);}catch(_){}}
   }finally{
     registrationInProgress=false;button.disabled=false;button.classList.remove("is-loading");
@@ -930,7 +930,7 @@ $("correctionForm").addEventListener("submit",async event=>{
     }
   }
   if(!/^\+?[1-9]\d{6,14}$/.test(phone.replace(/[\s().-]/g,""))){
-    setStatus("Valid mobile number country code ke saath bhariye.");return;
+    setStatus("Enter a valid mobile number with country code.");return;
   }
   const documents={...(correctionApplication.documents||{})};
   for(const [key,file] of Object.entries(files))if(file)documents[key]=file.name;
@@ -969,7 +969,7 @@ if(loginInProgress)return;
 const email=$("email").value.trim();
 const password=$("password").value;
 if(!email||!password){
-setStatus("Email aur password dono bhariye.");
+setStatus("Enter both your email and password.");
 return;
 }
 loginInProgress=true;
@@ -1177,7 +1177,7 @@ const variants=$("itemVariants").value.split("\n").map(line=>line.trim()).filter
 const editId=$("editItemId").value;
 
 if(!name||!category||!Number.isFinite(price)||price<=0){
-$("menuMessage").textContent="Valid name, category aur price bhariye.";
+$("menuMessage").textContent="Enter a valid name, category, and price.";
 return;
 }
 
@@ -1442,7 +1442,7 @@ el.style.border="2px solid #ff354d";el.style.background="rgba(95,12,24,.24)";
 const small=el.querySelector(".small");
 if(remaining<=0){
 startOrderAlarm(id);
-small.textContent="⚠ TIME OVER! "+mins+":"+String(secs).padStart(2,"0")+" late. Food check karke READY dabayein.";
+small.textContent="⚠ TIME EXPIRED! "+mins+":"+String(secs).padStart(2,"0")+" late. Check the food and select READY.";
 if(!el.querySelector("[data-mark-ready]")){
 const btn=document.createElement("button");btn.className="success";btn.dataset.markReady=id;btn.textContent="MARK READY FOR "+type;el.appendChild(btn);
 }
@@ -1548,7 +1548,7 @@ startLiveOrders();
 window.setTimeout(() => {
   const status = document.getElementById("globalStatus");
   if (status && /partner panel starting/i.test(status.textContent || "")) {
-    status.textContent = "APP START ERROR: Partner JavaScript/Firebase module start nahi hua. Internet connection aur Firebase CDN loading check kijiye; page refresh karke dobara try karein.";
+    status.textContent = "APP START ERROR: The Partner App JavaScript/Firebase module did not start. Check your internet connection and Firebase CDN loading, then refresh the page and try again.";
   }
 }, 15000);
 </script>
