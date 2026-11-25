@@ -1452,6 +1452,14 @@ const btn=document.createElement("button");btn.className="success";btn.dataset.m
 if(!window.zaikaPrepTimer){window.zaikaPrepTimer=setInterval(()=>{refreshPrepTimers();},1000);}
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)refreshPrepTimers();});
 window.addEventListener("focus",refreshPrepTimers);
+async function syncCustomerTrackingStatus(order,status){
+ try{
+  const code=String(order?.trackingCode||"").toUpperCase().replace(/[\\s-]/g,"");
+  if(!/^[A-Z2-9]{20}$/.test(code))return;
+  await updateDoc(doc(db,"orderTracking",code),{status,updatedAt:serverTimestamp()});
+ }catch(error){console.warn("Customer tracking status sync failed:",status,error);}
+}
+
 function renderOrders(){
 const countStatus=status=>partnerOrders.filter(order=>String(order.status||"New").toLowerCase()===status.toLowerCase()).length;
 $("ordersWaitingCount").textContent=String(countStatus("New"));$("tabNewCount").textContent=String(countStatus("New"));
@@ -1496,6 +1504,7 @@ const type=String(order.orderType||order.deliveryType||order.fulfillmentType||"D
 button.disabled=true;button.textContent="SAVING...";
 try{
  await updateDoc(doc(db,"orders",id),{status:"Ready",readyAt:serverTimestamp(),handoverType:type,readyConfirmedByRestaurant:true,updatedAt:serverTimestamp()});
+ await syncCustomerTrackingStatus(order,"Ready");
  stopOrderAlarm(id);
  setStatus("Order marked READY. The Delivery Partner has been alerted.");
  }catch(error){alert("READY UPDATE FAILED: "+error.message);button.disabled=false;button.textContent="✓ MARK READY";}
@@ -1509,7 +1518,7 @@ const orderId=button.dataset.order,status=button.dataset.status,order=partnerOrd
 if(status==="Accepted"){pendingAcceptOrderId=orderId;selectedPrepMinutes=estimatePrepMinutes(order);$("prepTimeValue").textContent=String(selectedPrepMinutes);$("prepTimeDialog").classList.add("open");return;}
 if(!confirm("Set order status to "+status+"?"))return;
 button.disabled=true;button.textContent="UPDATING...";
-try{const batch=writeBatch(db);const update={status,updatedAt:serverTimestamp()};if(status==="Preparing"){update.preparingAt=serverTimestamp();}batch.update(doc(db,"orders",orderId),update);await batch.commit();setStatus("Set order status to updated: "+status);button.textContent="✓ "+status.toUpperCase();button.classList.add("confirmed");}catch(error){alert("ORDER ERROR: "+(error.code||"")+" - "+error.message);setStatus("Order update failed: "+error.message);button.disabled=false;button.textContent="START PREPARING";}
+try{const batch=writeBatch(db);const update={status,updatedAt:serverTimestamp()};if(status==="Preparing"){update.preparingAt=serverTimestamp();}batch.update(doc(db,"orders",orderId),update);await batch.commit();await syncCustomerTrackingStatus(order,status);setStatus("Set order status to updated: "+status);button.textContent="✓ "+status.toUpperCase();button.classList.add("confirmed");}catch(error){alert("ORDER ERROR: "+(error.code||"")+" - "+error.message);setStatus("Order update failed: "+error.message);button.disabled=false;button.textContent="START PREPARING";}
 });
 $("prepTimeMinus").addEventListener("click",()=>{selectedPrepMinutes=Math.max(5,selectedPrepMinutes-1);$("prepTimeValue").textContent=String(selectedPrepMinutes);});
 $("prepTimePlus").addEventListener("click",()=>{selectedPrepMinutes=Math.min(30,selectedPrepMinutes+1);$("prepTimeValue").textContent=String(selectedPrepMinutes);});
@@ -1523,6 +1532,7 @@ try{
 const duration=Math.min(30,Math.max(5,Number(selectedPrepMinutes)||15));
 unlockZaikaAlarm();
 await updateDoc(doc(db,"orders",id),{status:"Preparing",acceptedAt:serverTimestamp(),preparingAt:serverTimestamp(),prepDurationMinutes:duration,estimatedReadyAt:new Date(Date.now()+duration*60000),updatedAt:serverTimestamp()});
+await syncCustomerTrackingStatus(partnerOrders.find(item=>item.id===id),"Preparing");
 $("prepTimeDialog").classList.remove("open");pendingAcceptOrderId=null;const acceptedOrder=partnerOrders.find(item=>item.id===id);if(acceptedOrder){acceptedOrder.status="Preparing";acceptedOrder.prepDurationMinutes=duration;const readyAtMs=Date.now()+duration*60000;window.zaikaPrepDeadlines[id]=readyAtMs;acceptedOrder.estimatedReadyAt={toMillis:()=>readyAtMs};}updateIncomingOrderCount();renderOrders();setStatus("Order accepted. Preparation time set to "+duration+" minutes.");
 }catch(error){alert("ORDER ACCEPT FAILED: "+(error.code||"")+" - "+error.message);setStatus("Order accept failed: "+error.message);if(orderButton){orderButton.disabled=false;orderButton.textContent="ACCEPT ORDER";}}
 finally{button.disabled=false;button.textContent="CONFIRM & ACCEPT";}
@@ -1531,7 +1541,8 @@ $("cancelRejectBtn").addEventListener("click",()=>{pendingRejectOrderId=null;$("
 $("confirmRejectBtn").addEventListener("click",async()=>{
 if(!pendingRejectOrderId||!currentRestaurantId)return;const reason=$("rejectReason").value,note=$("rejectNote").value.trim();if(!reason){alert("Please select a rejection reason.");return;}if(reason==="Other"&&!note){alert("Please enter a short note for the Other reason.");return;}
 const id=pendingRejectOrderId,button=$("confirmRejectBtn");button.disabled=true;button.textContent="UPDATING...";
-try{const rejectionReason=reason==="Other"?note:reason+(note?" — "+note:"");await updateDoc(doc(db,"orders",id),{status:"Rejected",rejectionReason,rejectedAt:serverTimestamp(),updatedAt:serverTimestamp()});$("rejectDialog").classList.remove("open");pendingRejectOrderId=null;setStatus("Order rejected. Reason saved: "+reason);}catch(error){alert("REJECTION FAILED: "+(error.code||"")+" - "+error.message);setStatus("Rejection failed: "+error.message);}finally{button.disabled=false;button.textContent="CONFIRM REJECTION";}
+try{const rejectionReason=reason==="Other"?note:reason+(note?" — "+note:"");await updateDoc(doc(db,"orders",id),{status:"Rejected",rejectionReason,rejectedAt:serverTimestamp(),updatedAt:serverTimestamp()});
+await syncCustomerTrackingStatus(partnerOrders.find(item=>item.id===id),"Rejected");$("rejectDialog").classList.remove("open");pendingRejectOrderId=null;setStatus("Order rejected. Reason saved: "+reason);}catch(error){alert("REJECTION FAILED: "+(error.code||"")+" - "+error.message);setStatus("Rejection failed: "+error.message);}finally{button.disabled=false;button.textContent="CONFIRM REJECTION";}
 });
 
 // REFRESH ORDERS
